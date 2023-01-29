@@ -11,9 +11,11 @@ from meross_iot.manager import MerossManager
 
 EMAIL = os.environ.get('MEROSS_EMAIL')
 PASSWORD = os.environ.get('MEROSS_PASSWORD')
+TO_EMAILS = os.environ.get('TO_EMAILS').split(',')
 
 RUNNING_DELAY = 180
 STOPPED_DELAY = 1800
+THRESHOLD = 100
 THRESHOLD = 100
 
 async def main():
@@ -52,7 +54,7 @@ async def main():
                     delay = RUNNING_DELAY
 
                 if (record.turn_off_detected):
-                    send_email("Washing cycle completed", message, ['idhanu@gmail.com'])
+                    send_email("Washing cycle completed", message, TO_EMAILS)
                     print("Notified!")
                     delay = STOPPED_DELAY
                     record.clear()
