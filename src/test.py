@@ -12,8 +12,12 @@ from meross_iot.manager import MerossManager
 EMAIL = os.environ.get('MEROSS_EMAIL')
 PASSWORD = os.environ.get('MEROSS_PASSWORD')
 
+RUNNING_DELAY = 180
+STOPPED_DELAY = 1800
+THRESHOLD = 100
+
 async def main():
-    record = Tracker(sample_size=5, threshold=10, valid_points=3)
+    record = Tracker(sample_size=5, threshold=THRESHOLD, valid_points=4)
 
     # Setup the HTTP client API from user-password
     http_api_client = await MerossHttpClient.async_from_user_password(email=EMAIL, password=PASSWORD)
@@ -32,26 +36,28 @@ async def main():
         plug = plugs[0]
 
         # Update device status: this is needed only the very first time we play with this device (or if the
-        #  connection goes down)
+        # connection goes down)
         await plug.async_update()
 
-        
-        # send_email("Power consumption", message, ['idhanu@gmail.com'])
-
+        delay = STOPPED_DELAY
         try:
             while(True):
                 # Read the electricity power/voltage/current
                 instant_consumption = await plug.async_get_instant_metrics()
-                message = f"Power consumption is {instant_consumption.power}W";
-                print(message)
+                message = f"Power consumption is {instant_consumption.power}W"
                 record.record(instant_consumption.power)
+                print(record.samples[0])
+
+                if instant_consumption.power > THRESHOLD: 
+                    delay = RUNNING_DELAY
 
                 if (record.turn_off_detected):
-                    send_email("Synology is hibernating", message, ['idhanu@gmail.com'])
+                    send_email("Washing cycle completed", message, ['idhanu@gmail.com'])
                     print("Notified!")
+                    delay = STOPPED_DELAY
                     record.clear()
                 
-                await asyncio.sleep(180)
+                await asyncio.sleep(delay)
                 
         finally:
             # Close the manager and logout from http_api
