@@ -17,11 +17,12 @@ class Tracker:
     is_running = False
     turn_off_detected = False
 
-    def __init__(self, sample_size, threshold, valid_points):
+    def __init__(self, sample_size, threshold, running_detection_points, stopped_detection_points):
         self.samples = deque([], sample_size)
         self.sample_size = sample_size
         self.threshold = threshold
-        self.valid_points = valid_points
+        self.running_detection_points = running_detection_points
+        self.stopped_detection_points = stopped_detection_points
 
     def record(self, value):
         self.samples.appendleft(Record(value))
@@ -35,10 +36,14 @@ class Tracker:
         for i in range(self.sample_size):
             if self.samples[i].power > self.threshold:
                 over_threshold += 1
-        old_is_running = self.is_running
-        self.is_running = over_threshold >= self.valid_points
-        if (old_is_running == True and self.is_running == False):
-             self.turn_off_detected = True
+        under_threshold = self.sample_size - over_threshold
+
+        if self.is_running:
+            if under_threshold >= self.stopped_detection_points:
+                self.turn_off_detected = True
+                self.is_running = False
+        else:
+            self.is_running = over_threshold >= self.running_detection_points
 
     def clear(self):
         self.turn_off_detected = False
