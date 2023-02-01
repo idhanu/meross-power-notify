@@ -19,7 +19,8 @@ THRESHOLD = 100
 THRESHOLD = 100
 
 async def main():
-    record = Tracker(sample_size=5, threshold=THRESHOLD, valid_points=4)
+    record = Tracker(sample_size=5, threshold=10,
+                     running_detection_points=2, stopped_detection_points=5)
 
     # Setup the HTTP client API from user-password
     http_api_client = await MerossHttpClient.async_from_user_password(email=EMAIL, password=PASSWORD)
