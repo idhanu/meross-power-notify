@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 # Set the base API endpoint URL
 AMBER_BASE_URL = "https://api.amber.com.au/v1"
 # Define the specific endpoint for prices
-SITES_ENDPOINT = "/sites/01FWZA56KHW0TTQNA8478MT5J1/prices"
+SITES_ENDPOINT = "/sites/01FWZA56KHW0TTQNA8478MT5J1/prices/current?resolution=30&next=48"
 
 logger = logging.getLogger("AMBER")
 
