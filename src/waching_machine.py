@@ -25,7 +25,7 @@ async def washing_machine_monitor(manager):
         instant_consumption = await plug.async_get_instant_metrics()
         message = f"Power consumption is {instant_consumption.power}W"
         record.record(instant_consumption.power)
-        logger.info(json.dumps(record.samples[0], 2))
+        logger.info(json.dumps(record.samples[0], indent=2))
 
         if instant_consumption.power > THRESHOLD: 
             delay = RUNNING_DELAY
