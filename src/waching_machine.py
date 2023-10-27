@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import sys
 from config import TO_EMAILS
@@ -24,7 +25,7 @@ async def washing_machine_monitor(manager):
         instant_consumption = await plug.async_get_instant_metrics()
         message = f"Power consumption is {instant_consumption.power}W"
         record.record(instant_consumption.power)
-        print(record.samples[0])
+        logger.info(json.dumps(record.samples[0], 2))
 
         if instant_consumption.power > THRESHOLD: 
             delay = RUNNING_DELAY
@@ -32,7 +33,7 @@ async def washing_machine_monitor(manager):
         if (record.turn_off_detected):
             to_emails = TO_EMAILS.split(',')
             send_email("Washing cycle completed", message, to_emails)
-            print("Notified!")
+            logger.info("Notified to ${TO_EMAILS}")
             delay = STOPPED_DELAY
             record.clear()
         
