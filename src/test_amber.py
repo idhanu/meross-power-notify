@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from amber import Amber
@@ -6,6 +7,7 @@ from mocks.mock_amber_data import amber_values_actual, amber_values_two_extremel
 class TestAmber(unittest.TestCase):
 
     def test_should_charge_ev(self):
+        logging.basicConfig(level=logging.DEBUG)
         # Create an instance of the Amber class
         amber = Amber()
         # self.assertTrue(amber.should_charge_ev(amber_values_actual))

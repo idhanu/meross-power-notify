@@ -21,7 +21,7 @@ async def ev_monitor(manager):
                 logger.error("Could not get upcoming rates from Amber, trying again in 5 minutes")
                 await asyncio.sleep(300)
 
-        should_charge = amber.should_charge_ev(data)
+        should_charge = amber.should_charge_ev(data, threshold=12)
         logger.info(f"Should charge: {should_charge}")
 
         if should_charge:

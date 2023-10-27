@@ -6,9 +6,6 @@ logging.basicConfig(
     format='%(asctime)s [%(name)s] %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'  # Define the timestamp format
 )
-from dotenv import load_dotenv
-load_dotenv()
-
 
 import asyncio
 from time import sleep

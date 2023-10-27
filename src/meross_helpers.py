@@ -5,6 +5,8 @@ import os
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
+from config import MEROSS_EMAIL, MEROSS_PASSWORD
+
 logger = logging.getLogger("MEROSS")
 
 async def find_device(manager, name, delay = 60):
@@ -22,8 +24,8 @@ async def find_device(manager, name, delay = 60):
         logger.info("Retrying async_device_discovery")
 
 async def get_meross():
-    email = os.environ.get('MEROSS_EMAIL')
-    password = os.environ.get('MEROSS_PASSWORD')
+    email = MEROSS_EMAIL
+    password = MEROSS_PASSWORD
     # Setup the HTTP client API from user-password
     http_api_client = await MerossHttpClient.async_from_user_password(email=email, password=password)
 

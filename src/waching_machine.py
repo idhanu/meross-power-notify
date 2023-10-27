@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from config import TO_EMAILS
 from mail import send_email
 from meross_helpers import find_device
 from tracker import Tracker
@@ -29,7 +30,7 @@ async def washing_machine_monitor(manager):
             delay = RUNNING_DELAY
 
         if (record.turn_off_detected):
-            to_emails = os.environ.get('TO_EMAILS').split(',')
+            to_emails = TO_EMAILS.split(',')
             send_email("Washing cycle completed", message, to_emails)
             print("Notified!")
             delay = STOPPED_DELAY

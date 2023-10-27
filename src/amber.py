@@ -1,9 +1,11 @@
 import os
+import time
 import requests
 import logging
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
+from config import AMBER_API_KEY
 
 # Get the API key from the environment variable
 
@@ -21,19 +23,19 @@ class Amber:
 
         # Calculate the time for today's 3 PM
         three_pm_today = current_time.replace(hour=15, minute=0, second=0, microsecond=0)
-        return three_pm_today + timedelta(days=1) if current_time >= three_pm_today else three_pm_today
+        now = three_pm_today + timedelta(days=1) if current_time >= three_pm_today else three_pm_today
+        return now.timestamp()
 
-    def format_time(self, time):
-        return datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
+    def format_time(self, time_str):
+        return datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
 
     def get_upcoming_rates(self):
         # Construct the complete URL
         url = f"{AMBER_BASE_URL}{SITES_ENDPOINT}"
 
         # Define headers with authorization
-        amberApiKey = os.environ.get("AMBER_API_KEY")
         headers = {
-            "Authorization": f"Bearer {amberApiKey}",
+            "Authorization": f"Bearer {AMBER_API_KEY}",
             "accept": "application/json",
         }
 
@@ -67,7 +69,7 @@ class Amber:
 
         upcomingPrices = {}
         next_cutoff = self.get_cutoff()
-        logger.info(f"Next cutoff is {next_cutoff}")
+        logger.info(f"Next cutoff is {time.ctime(next_cutoff)}")
 
         for element in amber_prices:
             if element["type"] == "ForecastInterval" and self.format_time(element["endTime"]) <= next_cutoff:
@@ -75,8 +77,7 @@ class Amber:
                     upcomingPrices[element['descriptor']] = 0
                 upcomingPrices[element['descriptor']] += 1
 
-        logger.info(f"Current price is {current_interval_descriptor}. Need to look at future prices until {next_cutoff}: {json.dumps(upcomingPrices, indent=2)}")
-        
+        logger.info(f"Current price is {current_interval_descriptor}. Need to look at future prices until {time.ctime(next_cutoff)}: {json.dumps(upcomingPrices, indent=2)}")
 
         if current_interval_descriptor == 'veryLow':
             if upcomingPrices.get('extremelyLow', 0) < threshold:

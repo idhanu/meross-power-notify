@@ -2,9 +2,11 @@ import smtplib
 from email.mime.text import MIMEText
 import os
 
+from config import GMAIL_APP_PASSWORD, GMAIL_SENDER
+
 def send_email(subject, body, recipients):
-    sender = os.environ.get('GMAIL_SENDER')
-    password = os.environ.get('GMAIL_APP_PASSWORD')
+    sender = GMAIL_SENDER
+    password = GMAIL_APP_PASSWORD
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender
