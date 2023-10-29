@@ -2,6 +2,18 @@ import asyncio
 from aiohttp import web
 import logging
 import os
+import socket
+
+def get_local_ip():
+    try:
+        # Create a socket to get the local IP address
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(('8.8.8.8', 80))  # Connecting to a public DNS server
+            local_ip = s.getsockname()[0]
+            return local_ip
+    except socket.error:
+        return "Could not retrieve local IP"
+
 
 # Get the directory of the current file
 current_file_path = os.path.realpath(__file__)
@@ -26,14 +38,16 @@ async def dashboard(request):
 async def handler(request):
     return await dashboard(request)
 
-
 PORT = 22000
 async def run_server():
     logger.info('Starting server')
     server = web.Server(handler)
     runner = web.ServerRunner(server)
     await runner.setup()
-    site = web.TCPSite(runner, 'localhost', PORT)
+    ip = get_local_ip()
+    site = web.TCPSite(runner, ip, PORT)
     await site.start()
 
-    logger.info(f"Server running on http://localhost:{PORT}")
+    logger.info(f"Server running on http://{ip}:{PORT}")
+
+asyncio.run(run_server())
