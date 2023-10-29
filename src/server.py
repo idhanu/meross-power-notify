@@ -24,7 +24,6 @@ async def dashboard(request):
     return web.Response(text=read_last_n_lines(logs_path, 50))
     
 async def handler(request):
-    logger.debug(f"Received request: {request}")
     return await dashboard(request)
 
 
