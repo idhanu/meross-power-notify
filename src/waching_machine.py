@@ -1,6 +1,4 @@
 import asyncio
-import json
-import os
 import sys
 from config import TO_EMAILS
 from mail import send_email

@@ -1,5 +1,7 @@
 import logging
 
+from server import run_server
+
 # Configure the logging settings
 logging.basicConfig(
     level=logging.INFO,  # Set the desired logging level
@@ -21,7 +23,7 @@ async def main():
     manager, http_api_client = await get_meross()
 
     try:
-        await asyncio.gather(washing_machine_monitor(manager), ev_monitor(manager))
+        await asyncio.gather(washing_machine_monitor(manager), ev_monitor(manager), run_server())
         
     finally:
         # Close the manager and logout from http_api
