@@ -1,18 +1,12 @@
-import asyncio
+# import asyncio
 from aiohttp import web
 import logging
 import os
 import socket
 
 def get_local_ip():
-    try:
-        # Create a socket to get the local IP address
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(('8.8.8.8', 80))  # Connecting to a public DNS server
-            local_ip = s.getsockname()[0]
-            return local_ip
-    except socket.error:
-        return "Could not retrieve local IP"
+    ## getting the IP address using socket.gethostbyname() method
+    return socket.gethostbyname("")
 
 
 # Get the directory of the current file
@@ -25,6 +19,8 @@ relative_path = '../logs.log'
 # Get the absolute path of the file relative to the current file
 logs_path = os.path.abspath(os.path.join(current_directory, relative_path))
 logger = logging.getLogger("SERVER")
+
+logging.basicConfig(level=logging.INFO)
 
 def read_last_n_lines(file_path, n):
     with open(file_path, 'r') as file:
@@ -49,5 +45,6 @@ async def run_server():
     await site.start()
 
     logger.info(f"Server running on http://{ip}:{PORT}")
+    # await asyncio.sleep(34343434)
 
-asyncio.run(run_server())
+# asyncio.run(run_server())
