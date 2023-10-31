@@ -20,8 +20,6 @@ relative_path = '../logs.log'
 logs_path = os.path.abspath(os.path.join(current_directory, relative_path))
 logger = logging.getLogger("SERVER")
 
-logging.basicConfig(level=logging.INFO)
-
 def read_last_n_lines(file_path, n):
     with open(file_path, 'r') as file:
         lines = file.readlines()
