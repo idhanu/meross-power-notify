@@ -1,4 +1,4 @@
-import asyncio
+# import asyncio
 import json
 from aiohttp import web
 import logging
@@ -72,6 +72,6 @@ async def run_server():
     await site.start()
 
     logger.info(f"Server running on http://{ip}:{PORT}")
-    await asyncio.sleep(34343434)
+    # await asyncio.sleep(34343434)
 
-asyncio.run(run_server())
+# asyncio.run(run_server())
