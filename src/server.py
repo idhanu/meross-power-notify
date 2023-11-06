@@ -65,7 +65,7 @@ async def run_server():
     app.router.add_route('GET', '/{tail:.*}', dashboardHandler)
 
     logger.info('Starting server')
-    runner = web.AppRunner(app)
+    runner = web.AppRunner(app, access_log=None)
     await runner.setup()
     ip = get_local_ip()
     site = web.TCPSite(runner, ip, PORT)
