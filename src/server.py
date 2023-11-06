@@ -37,6 +37,11 @@ async def updateSettingsHandler(request):
 async def logsHandler(request):
     return web.json_response({'success': True, "logs":read_last_n_lines(logs_path, 50) })
 
+async def dashboardHandler(request):
+    file = os.path.join(current_directory, '../home-dashboard/dist' + ('/index.html' if request.path == '/' else request.path))
+    return  web.FileResponse(file) if os.path.exists(file) else web.Response(status=404)
+
+
 PORT = 22000
 
 @web.middleware
@@ -57,6 +62,7 @@ async def run_server():
     app = web.Application(middlewares=[cors_middleware])
     app.router.add_route('GET', '/api/logs', logsHandler)
     app.router.add_route('POST', '/api/settings', updateSettingsHandler)
+    app.router.add_route('GET', '/{tail:.*}', dashboardHandler)
 
     logger.info('Starting server')
     runner = web.AppRunner(app)

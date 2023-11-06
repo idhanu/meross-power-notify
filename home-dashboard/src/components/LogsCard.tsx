@@ -13,8 +13,11 @@ import { useState } from "react";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+const basePath = window.location.host.includes("localhost")
+  ? "http://localhost:22000"
+  : "";
 const fetchLogs = async () => {
-  const response = await fetch("http://localhost:22000/api/logs");
+  const response = await fetch(`${basePath}/api/logs`);
   return (await response.json()) as { logs: string[] };
 };
 
