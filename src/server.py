@@ -1,4 +1,4 @@
-# import asyncio
+import asyncio
 import json
 from aiohttp import web
 import logging
@@ -26,32 +26,46 @@ logger = logging.getLogger("SERVER")
 def read_last_n_lines(file_path, n):
     with open(file_path, 'r') as file:
         lines = file.readlines()
-        last_n_lines = lines[-n:]
-        return ''.join(last_n_lines)
+        return lines[-n:]
 
-async def dashboard(request):
-    if request.path == '/' and request.method == 'GET':
-        return web.Response(text=read_last_n_lines(logs_path, 50))
-    elif request.path == '/settings' and request.method == 'POST':
-        data = await request.json()
-        update_settings(data)
-        logger.info(f"Updating settings with: {json.dumps(data, indent=2)}")
-        return web.json_response({'success': True})
+async def updateSettingsHandler(request):
+    data = await request.json()
+    update_settings(data)
+    logger.info(f"Updating settings with: {json.dumps(data, indent=2)}")
+    return web.json_response({'success': True})
     
-async def handler(request):
-    return await dashboard(request)
+async def logsHandler(request):
+    return web.json_response({'success': True, "logs":read_last_n_lines(logs_path, 50) })
 
 PORT = 22000
+
+@web.middleware
+async def cors_middleware(request, handler):
+    if request.method == 'OPTIONS':
+        # Respond to preflight requests immediately
+        response = web.Response()
+    else:
+        response = await handler(request)
+        
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response
+
+
 async def run_server():
+    app = web.Application(middlewares=[cors_middleware])
+    app.router.add_route('GET', '/api/logs', logsHandler)
+    app.router.add_route('POST', '/api/settings', updateSettingsHandler)
+
     logger.info('Starting server')
-    server = web.Server(handler)
-    runner = web.ServerRunner(server)
+    runner = web.AppRunner(app)
     await runner.setup()
     ip = get_local_ip()
     site = web.TCPSite(runner, ip, PORT)
     await site.start()
 
     logger.info(f"Server running on http://{ip}:{PORT}")
-    # await asyncio.sleep(34343434)
+    await asyncio.sleep(34343434)
 
-# asyncio.run(run_server())
+asyncio.run(run_server())
