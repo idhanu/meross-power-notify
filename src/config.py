@@ -8,3 +8,12 @@ GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
 MEROSS_EMAIL = os.environ.get('MEROSS_EMAIL')
 MEROSS_PASSWORD = os.environ.get('MEROSS_PASSWORD')
 TO_EMAILS = os.environ.get('TO_EMAILS')
+
+SETTINGS = {
+    'evChargingThreshold': 12
+}
+
+def update_settings(settings):
+    for key, value in settings.items():
+        SETTINGS[key] = value
+    return settings

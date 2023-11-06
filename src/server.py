@@ -1,8 +1,11 @@
 # import asyncio
+import json
 from aiohttp import web
 import logging
 import os
 import socket
+
+from config import update_settings
 
 def get_local_ip():
     ## getting the IP address using socket.gethostbyname() method
@@ -27,7 +30,13 @@ def read_last_n_lines(file_path, n):
         return ''.join(last_n_lines)
 
 async def dashboard(request):
-    return web.Response(text=read_last_n_lines(logs_path, 50))
+    if request.path == '/' and request.method == 'GET':
+        return web.Response(text=read_last_n_lines(logs_path, 50))
+    elif request.path == '/settings' and request.method == 'POST':
+        data = await request.json()
+        update_settings(data)
+        logger.info(f"Updating settings with: {json.dumps(data, indent=2)}")
+        return web.json_response({'success': True})
     
 async def handler(request):
     return await dashboard(request)
