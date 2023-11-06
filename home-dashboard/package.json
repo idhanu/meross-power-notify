@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "publish": "scp -r ./dist pi@192.168.68.113:/home/pi/meross-power-notify/home-dashboard/dist",
+    "publish": "npm run build && scp -r ./dist pi@192.168.68.113:/home/pi/meross-power-notify/home-dashboard/dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
