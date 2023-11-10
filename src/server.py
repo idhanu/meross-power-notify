@@ -60,6 +60,7 @@ async def dashboard_handler(request):
 async def meross_get_plug_handler(request):
     device = await find_device(request.query.get("name"))
     instant_consumption = await device.async_get_instant_metrics()
+    logger.info(f"Returning instant consumption: {instant_consumption}")
     return web.json_response(
         {
             "success": True,
@@ -79,6 +80,7 @@ async def meross_post_plug_handler(request):
         await device.async_turn_on(channel=0)
     else:
         await device.async_turn_off(channel=0)
+    logger.info(f"Turning {data['name']} {'on' if data['on'] else 'off'}")
     return web.json_response(
         {
             "success": True,
