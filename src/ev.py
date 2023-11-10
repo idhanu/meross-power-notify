@@ -1,6 +1,6 @@
 import json
 import logging
-from config import SETTINGS
+from config import EV_SETTINGS
 from meross_helpers import find_device
 import asyncio
 from amber import Amber
@@ -12,7 +12,7 @@ logger = logging.getLogger('EV')
 
 async def ev_monitor(manager):
     amber = Amber()
-    plug = await find_device(manager, "EV")
+    plug = await find_device("EV")
     while (True):
         while (True):
             try: 
@@ -22,8 +22,8 @@ async def ev_monitor(manager):
                 logger.error("Could not get upcoming rates from Amber, trying again in 5 minutes")
                 await asyncio.sleep(300)
 
-        should_charge = amber.should_charge_ev(data, threshold=SETTINGS['evChargingThreshold'])
-        logger.info(f"Charge threshold: {SETTINGS['evChargingThreshold']}")
+        should_charge = amber.should_charge_ev(data, threshold=EV_SETTINGS['ev'])
+        logger.info(f"Charge threshold: {EV_SETTINGS['ev']}")
         logger.info(f"Should charge: {should_charge}")
 
         if should_charge:

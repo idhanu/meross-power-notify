@@ -1,4 +1,3 @@
-
 import asyncio
 import logging
 import os
@@ -9,8 +8,19 @@ from config import MEROSS_EMAIL, MEROSS_PASSWORD
 
 logger = logging.getLogger("MEROSS")
 
-async def find_device(manager, name, delay = 60):
+manager = None
+
+
+async def get_manager():
+    return manager
+
+
+async def find_device(name, delay=60):
     while True:
+        devices = manager.find_devices(device_name=name)
+        if len(devices) >= 1:
+            return devices[0]
+
         await manager.async_device_discovery()
         devices = manager.find_devices(device_name=name)
 
@@ -23,11 +33,15 @@ async def find_device(manager, name, delay = 60):
         await asyncio.sleep(delay)
         logger.info("Retrying async_device_discovery")
 
+
 async def get_meross():
+    global manager
     email = MEROSS_EMAIL
     password = MEROSS_PASSWORD
     # Setup the HTTP client API from user-password
-    http_api_client = await MerossHttpClient.async_from_user_password(email=email, password=password)
+    http_api_client = await MerossHttpClient.async_from_user_password(
+        email=email, password=password
+    )
 
     # Setup and start the device manager
     manager = MerossManager(http_client=http_api_client)
