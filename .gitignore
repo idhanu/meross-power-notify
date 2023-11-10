@@ -3,4 +3,5 @@ venv
 logs.log
 node_modules
 dist
+logs.log
 __pycache__
