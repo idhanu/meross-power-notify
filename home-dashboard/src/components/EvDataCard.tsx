@@ -1,19 +1,14 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Skeleton,
-  Alert,
-  Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Skeleton, Alert } from "@mui/material";
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
-import { useState } from "react";
 
 export const EvDataCard: React.FC = () => {
-  const { isLoading, isError, data, error } = useQuery("amber_rates", () =>
+  const {
+    isLoading,
+    isError,
+    data: _data,
+    error,
+  } = useQuery("amber_rates", () =>
     request<{ rates: { name: string } }>("/amber/rate")
   );
 

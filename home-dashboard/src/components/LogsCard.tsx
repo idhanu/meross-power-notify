@@ -16,11 +16,11 @@ import { request } from "../helpers/api";
 
 export const LogsCard: React.FC = () => {
   const { isLoading, isError, data, error } = useQuery("logs", () =>
-    request<{ logs: string[] }>("/api/logs")
+    request<{ result: string[] }>("/api/logs")
   );
   const [more, setMore] = useState(false);
 
-  const shownLogs = more ? data?.logs : data?.logs.slice(-5);
+  const shownLogs = more ? data?.result : data?.result.slice(-5);
 
   return (
     <Card sx={{ minWidth: 275 }}>

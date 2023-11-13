@@ -6,6 +6,8 @@ import { commonHeadersMiddleware } from './middleware/commonHeaders';
 import logger from './pino';
 import { getUpcomingRates } from './apis/amber';
 import { ChargeMonitor } from './monitors/chargeMonitor';
+import path from 'path';
+import { readFile } from 'fs/promises';
 
 const chargeMonitor = new ChargeMonitor();
 
@@ -13,13 +15,25 @@ export const app: Express = express();
 app.use(json());
 app.use(commonHeadersMiddleware);
 
+app.use('/', express.static(path.join(__dirname, '../../home-dashboard/dist')));
+
 // Health check endpoint
-app.get('/ping', (_req: Request, res: Response) => {
+app.get('/api/ping', (_req: Request, res: Response) => {
   res.json({ message: 'pong' });
 });
 
-app.get('/amber/rates', async (_req: Request, res: Response) => {
+app.get('/api/amber/rates', async (_req: Request, res: Response) => {
   res.json({ result: await getUpcomingRates() });
+});
+
+app.post('/api/ev/settings', async (_req: Request, res: Response) => {
+  res.json({ result: await getUpcomingRates() });
+});
+
+app.get('/api/logs', async (_req: Request, res: Response) => {
+  const file = await readFile(path.join(__dirname, '../../logs.log'));
+  const lines = file.toString().split('\n');
+  res.json({ result: lines.slice(lines.length - 30) });
 });
 
 app.use(errorResponseMiddleware);
