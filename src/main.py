@@ -1,7 +1,5 @@
 import logging
 
-from server import run_server
-
 # Configure the logging settings
 logging.basicConfig(
     level=logging.INFO,  # Set the desired logging level
@@ -9,10 +7,10 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",  # Define the timestamp format
 )
 
+from server import run_server
 import asyncio
 from time import sleep
 
-from ev import ev_monitor
 from meross_helpers import get_meross
 from waching_machine import washing_machine_monitor
 

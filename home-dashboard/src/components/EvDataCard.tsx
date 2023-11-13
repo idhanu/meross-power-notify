@@ -74,6 +74,13 @@ const EvInfoCard = ({
 );
 
 const toPrice = (price: number) => price.toFixed(2) + " ¢/kWh";
+const toDate = (date: string | number) =>
+  new Date(date).toLocaleString("en-GB", {
+    month: "2-digit",
+    day: "2-digit",
+    minute: "2-digit",
+    hour: "2-digit",
+  });
 
 const calculateDaysSince = (targetDate: string): number => {
   const targetDateTime = new Date(targetDate);
@@ -127,15 +134,12 @@ export const EvDataCard: React.FC = () => {
               label="Current Price"
               value={toPrice(result.currentPrice.perKwh)}
             />
-            <EvInfoCard
-              label="Cutoff Time"
-              value={new Date(result.cutoff).toLocaleString()}
-            />
+            <EvInfoCard label="Cutoff Time" value={toDate(result.cutoff)} />
             <EvInfoCard
               label="Settings Expiry"
               value={
                 result.settings.expireAt
-                  ? new Date(result.settings.expireAt).toLocaleString()
+                  ? toDate(result.settings.expireAt)
                   : "No expiry"
               }
             />
@@ -156,8 +160,8 @@ export const EvDataCard: React.FC = () => {
               xs={12}
               value={
                 <Grid container spacing={1}>
-                  {result.lowestPrices.map((price) => (
-                    <Grid item xs={2}>
+                  {result.lowestPrices.map((price, i) => (
+                    <Grid item xs={2} key={i} sm={1}>
                       <Typography variant="body2">
                         {price.toFixed(1)}
                       </Typography>

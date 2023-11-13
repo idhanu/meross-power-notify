@@ -7,7 +7,7 @@ import socket
 from amber import Amber
 
 from config import EV_SETTINGS
-from meross_helpers import find_device, get_manager
+from meross_helpers import find_device
 
 server_only = __name__ == "__main__"
 

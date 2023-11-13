@@ -43,7 +43,7 @@ export const LogsCard: React.FC = () => {
             </>
           )}
           {shownLogs?.map((log: string, i) => (
-            <Box key={i} pb={1}>
+            <Box key={i} pb={1} whiteSpace="break-spaces" m={0}>
               {log}
             </Box>
           ))}

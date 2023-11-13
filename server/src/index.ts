@@ -43,7 +43,7 @@ app.get('/api/ev/settings', async (_req: Request, res: Response) => {
 app.get('/api/logs', async (_req: Request, res: Response) => {
   const file = await readFile(path.join(__dirname, '../../logs.log'), { flag: 'r' });
   const lines = file.toString().split('\n');
-  res.json({ result: lines.slice(lines.length - 30) });
+  res.json({ result: lines.slice(Math.max(lines.length - 20, 0)) });
 });
 
 app.use(errorResponseMiddleware);
