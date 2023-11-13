@@ -1,14 +1,24 @@
 import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
 import { setMerossPlug } from '../apis/meross';
+import { sleep } from '../utils/helpers';
 
 export class ChargeMonitor {
   private settings = {
-    cutoffHour: 9,
+    cutoffHour: 15,
     maxPrice: 30,
-    stateOfCharge: 90,
+    stateOfCharge: 70,
     preferredPrice: 18,
   };
+  
+  calculateTimeToNextMinute = (): number => {
+    const now = new Date();
+    const currentMinute = now.getMinutes();
+    const targetMinute = (currentMinute > 30 ? 60 : 30) - currentMinute + 1;
+    return targetMinute;
+  };
+
+  
 
   private getUpcomingCutoff = () => {
     const now = new Date();
@@ -59,16 +69,16 @@ export class ChargeMonitor {
 
     logger.info(
       'Decision based on: ' +
-        JSON.stringify(
-          {
-            lowestPrices,
-            averagePrice,
-            currentPrice: currentPrice.perKwh,
-            cutoff: new Date(cutoff).toLocaleString(undefined, { timeZone: 'Australia/Sydney' }),
-          },
-          null,
-          2,
-        ),
+      JSON.stringify(
+        {
+          lowestPrices,
+          averagePrice,
+          currentPrice: currentPrice.perKwh,
+          cutoff: new Date(cutoff).toLocaleString(undefined, { timeZone: 'Australia/Sydney' }),
+        },
+        null,
+        2,
+      ),
     );
 
     if (currentPrice && currentPrice.perKwh < averagePrice) {
@@ -79,12 +89,23 @@ export class ChargeMonitor {
   }
 
   async monitor() {
-    if (await this.shouldCharge()) {
-      logger.info('Turn on charging');
-      await setMerossPlug('EV', true);
-    } else {
-      logger.info('Turn off charging');
-      await setMerossPlug('EV', false);
+    while (true) {
+      try {
+        if (await this.shouldCharge()) {
+          logger.info('Turn on charging');
+          await setMerossPlug('EV', true);
+        } else {
+          logger.info('Turn off charging');
+          await setMerossPlug('EV', false);
+        }
+        const next = this.calculateTimeToNextMinute()
+        logger.info(`Wait for ${next} minutes until next check`)
+        await sleep(next * 60 * 1000)
+      } catch (e) {
+        logger.error(e)
+        logger.info(`Error occurred retrying after 1 minute`)
+        await sleep(60000)
+      }
     }
   }
 }
