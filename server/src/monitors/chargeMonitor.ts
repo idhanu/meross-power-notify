@@ -62,6 +62,7 @@ export class ChargeMonitor {
     const requiredTime = Math.ceil(((100 - settings.stateOfCharge) / 2.5) * 2);
 
     const validPrices = prices.filter((price) => price.endTimestamp <= cutoff).map((price) => price.perKwh);
+    validPrices.sort()
     const lowestPrices = validPrices.slice(0, requiredTime);
     let averagePrice = settings.preferredPrice;
     if (lowestPrices.length >= requiredTime) {
