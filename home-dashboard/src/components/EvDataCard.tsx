@@ -17,11 +17,13 @@ export interface ElectricityPrices {
 }
 export interface Result {
   lowestPrices: number[];
-  averagePrice: number;
+  priceMax: number;
   currentPrice: CurrentPrice;
   cutoff: number;
   settings: Settings;
   charge: boolean;
+  predictedStateOfCharge: number;
+  predictedAveragePrice: number;
 }
 export interface CurrentPrice {
   type: string;
@@ -48,17 +50,41 @@ export interface Settings {
   expireAt?: number;
 }
 
-const EvInfoCard = ({ value, label }: { value: ReactNode; label: string }) => (
-  <Grid item xs={3}>
-    <Stack>{label}</Stack>
-    <Stack>
-      <Typography variant="body2">{value}</Typography>
-    </Stack>
+const EvInfoCard = ({
+  value,
+  label,
+  xs,
+}: {
+  value: ReactNode;
+  label: string;
+  xs?: number;
+}) => (
+  <Grid item xs={xs || 6} sm={xs || 4} lg={xs || 3}>
+    <Typography
+      variant="body2"
+      component="div"
+      bgcolor="divider"
+      padding={1}
+      borderRadius={1}
+    >
+      <Stack sx={{ fontWeight: "bold" }}>{label}</Stack>
+      <Stack>{value}</Stack>
+    </Typography>
   </Grid>
 );
 
+const toPrice = (price: number) => price.toFixed(2) + " ¢/kWh";
+
+const calculateDaysSince = (targetDate: string): number => {
+  const targetDateTime = new Date(targetDate);
+  const currentDate = new Date();
+  const timeDifference = currentDate.getTime() - targetDateTime.getTime();
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  return daysDifference;
+};
+
 export const EvDataCard: React.FC = () => {
-  const { isLoading, isError, data, error } = useQuery("amber_rates", () =>
+  const { isLoading, isError, data, error } = useQuery("ev_last_update", () =>
     request<ElectricityPrices>("/api/ev/last_update")
   );
 
@@ -96,36 +122,50 @@ export const EvDataCard: React.FC = () => {
                 )
               }
             />
+            <EvInfoCard label="Max Price" value={toPrice(result.priceMax)} />
             <EvInfoCard
-              label="Average"
-              value={result.averagePrice.toFixed(2) + " kwh"}
+              label="Current Price"
+              value={toPrice(result.currentPrice.perKwh)}
             />
             <EvInfoCard
-              label="Current"
-              value={result.currentPrice.perKwh.toFixed(2) + " kwh"}
-            />
-            <EvInfoCard
-              label="Cutoff"
+              label="Cutoff Time"
               value={new Date(result.cutoff).toLocaleString()}
             />
             <EvInfoCard
-              label="Expiry"
+              label="Settings Expiry"
               value={
                 result.settings.expireAt
                   ? new Date(result.settings.expireAt).toLocaleString()
                   : "No expiry"
               }
             />
-            <Grid item xs={12}>
-              <div>Lowest Prices:</div>
-              <Grid container spacing={1}>
-                {result.lowestPrices.map((price) => (
-                  <Grid item xs={2}>
-                    <Typography variant="body2">{price.toFixed(1)}</Typography>
-                  </Grid>
-                ))}
-              </Grid>
-            </Grid>
+            <EvInfoCard
+              label="Predicted Charge"
+              value={result.predictedStateOfCharge + "%"}
+            />
+            <EvInfoCard
+              label="Predicted Average"
+              value={toPrice(result.predictedAveragePrice)}
+            />
+            <EvInfoCard
+              label="Target KMs"
+              value={calculateDaysSince("2023-10-19T00:00:00") * 55 + " km"}
+            />
+            <EvInfoCard
+              label="Lowest Prices:"
+              xs={12}
+              value={
+                <Grid container spacing={1}>
+                  {result.lowestPrices.map((price) => (
+                    <Grid item xs={2}>
+                      <Typography variant="body2">
+                        {price.toFixed(1)}
+                      </Typography>
+                    </Grid>
+                  ))}
+                </Grid>
+              }
+            />
           </Grid>
         )}
       </CardContent>

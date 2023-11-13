@@ -43,7 +43,9 @@ export const EvSettingsCard: React.FC = () => {
         body: JSON.stringify(values),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ev_settings", "logs"] });
+      queryClient.invalidateQueries({
+        queryKey: ["ev_settings", "ev_last_update"],
+      });
     },
   });
 
@@ -86,6 +88,7 @@ export const EvSettingsCard: React.FC = () => {
                 valueLabelDisplay="auto"
                 marks
               />
+              <Typography variant="body2">{values.cutoffHour}:00</Typography>
               <AccessTimeFilledIcon />
             </Stack>
             <Stack spacing={2} direction="row" alignItems="center">
@@ -101,6 +104,7 @@ export const EvSettingsCard: React.FC = () => {
                 valueLabelDisplay="auto"
                 marks
               />
+              <Typography variant="body2">{values.stateOfCharge}%</Typography>
               <BatteryFullIcon />
             </Stack>
           </Stack>

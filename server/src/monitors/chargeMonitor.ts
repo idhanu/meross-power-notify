@@ -25,14 +25,15 @@ export class ChargeMonitor {
     const now = new Date();
     const currentHour = now.getHours();
 
+    const settings = this.getSettings();
     // If the current hour is equal to or greater than the target hour,
     // set the date to the next day
-    if (currentHour >= this.settings.cutoffHour) {
+    if (currentHour >= settings.cutoffHour) {
       now.setDate(now.getDate() + 1);
     }
 
     // Set the time to the target hour
-    now.setHours(this.settings.cutoffHour, 0, 0, 0);
+    now.setHours(settings.cutoffHour, 0, 0, 0);
 
     return now.getTime();
   };
@@ -69,13 +70,11 @@ export class ChargeMonitor {
     const validPrices = prices.filter((price) => price.endTimestamp <= cutoff).map((price) => price.perKwh);
     validPrices.sort();
     const lowestPrices = validPrices.slice(0, requiredTime);
-    let averagePrice = settings.preferredPrice;
-    if (lowestPrices.length >= requiredTime) {
-      averagePrice = lowestPrices.reduce((a, b) => a + b, 0) / lowestPrices.length;
-    } else {
-      logger.info(
-        `Not enough prices available to calculate average price. Use preferred Price: ${settings.preferredPrice}`,
-      );
+    
+
+    const priceMax = Math.min(lowestPrices[lowestPrices.length - 1], settings.maxPrice);
+    if (lowestPrices.length < requiredTime) {
+      logger.info(`Not enough prices available to calculate average price.`);
     }
     const currentPrice = prices.find((price) => price.type === 'CurrentInterval');
     if (!currentPrice) {
@@ -83,22 +82,25 @@ export class ChargeMonitor {
     }
 
     let decision = false;
-    if (currentPrice && currentPrice.perKwh < averagePrice) {
+    if (currentPrice && currentPrice.perKwh < priceMax) {
       decision = true;
     }
 
-    if (currentPrice && currentPrice.perKwh > settings.maxPrice) {
-      logger.info(`Current price is too high. Use maxPrice: ${settings.maxPrice}`);
-      decision = false;
-    }
+    const predictedOnState = validPrices.filter((price) => price <= priceMax);
+    const predictedStateOfCharge = Math.min(predictedOnState.length * 1.25 + settings.stateOfCharge, 100);
+    const predictedAveragePrice =
+      predictedOnState.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / predictedOnState.length;
+
 
     this.lastUpdate = {
       lowestPrices,
-      averagePrice,
+      priceMax,
       currentPrice,
       cutoff,
       settings,
       charge: decision,
+      predictedStateOfCharge,
+      predictedAveragePrice,
     };
 
     logger.info('Decision based on: ' + JSON.stringify(this.lastUpdate));
