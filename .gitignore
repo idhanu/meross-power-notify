@@ -5,3 +5,4 @@ node_modules
 dist
 logs.log
 __pycache__
+server/dist/index.js
