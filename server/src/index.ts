@@ -32,12 +32,16 @@ app.post('/api/ev/settings', async (req: Request, res: Response) => {
   res.json({ result: null });
 });
 
+app.get('/api/ev/last_update', async (req: Request, res: Response) => {
+  res.json({ result: chargeMonitor.getLastUpdate() });
+});
+
 app.get('/api/ev/settings', async (_req: Request, res: Response) => {
   res.json({ result: chargeMonitor.getSettings() });
 });
 
 app.get('/api/logs', async (_req: Request, res: Response) => {
-  const file = await readFile(path.join(__dirname, '../../logs.log', 'r'));
+  const file = await readFile(path.join(__dirname, '../../logs.log'), { flag: 'r' });
   const lines = file.toString().split('\n');
   res.json({ result: lines.slice(lines.length - 30) });
 });

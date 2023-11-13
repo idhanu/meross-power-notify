@@ -11,6 +11,7 @@ export class ChargeMonitor {
     preferredPrice: 18,
   };
 
+  private lastUpdate: Record<string, unknown> | null = null;
   private interruptableSleep = new InterruptableSleep();
 
   calculateTimeToNextMinute = (): number => {
@@ -44,6 +45,10 @@ export class ChargeMonitor {
     return this.overrideSettings.expireAt > Date.now() ? { ...this.settings, ...this.overrideSettings } : this.settings;
   }
 
+  getLastUpdate() {
+    return this.lastUpdate;
+  }
+
   updateOverrideSettings(settings: Partial<typeof this.settings>) {
     this.overrideSettings = {
       expireAt: Date.now() + 24 * 60 * 60 * 1000,
@@ -62,7 +67,7 @@ export class ChargeMonitor {
     const requiredTime = Math.ceil(((100 - settings.stateOfCharge) / 2.5) * 2);
 
     const validPrices = prices.filter((price) => price.endTimestamp <= cutoff).map((price) => price.perKwh);
-    validPrices.sort()
+    validPrices.sort();
     const lowestPrices = validPrices.slice(0, requiredTime);
     let averagePrice = settings.preferredPrice;
     if (lowestPrices.length >= requiredTime) {
@@ -77,26 +82,23 @@ export class ChargeMonitor {
       throw new Error('No current price found');
     }
 
-    logger.info(
-      'Decision based on: ' +
-        JSON.stringify(
-          {
-            lowestPrices: lowestPrices.join(', '),
-            averagePrice,
-            currentPrice: currentPrice.perKwh,
-            cutoff: new Date(cutoff).toLocaleString(undefined, { timeZone: 'Australia/Sydney' }),
-            settings,
-          },
-          null,
-          2,
-        ),
-    );
-
+    let decision = false;
     if (currentPrice && currentPrice.perKwh < averagePrice) {
-      return true;
+      decision = true;
     }
 
-    return false;
+    this.lastUpdate = {
+      lowestPrices,
+      averagePrice,
+      currentPrice,
+      cutoff,
+      settings,
+      charge: decision,
+    };
+
+    logger.info('Decision based on: ' + JSON.stringify(this.lastUpdate));
+
+    return decision;
   }
 
   async monitor() {
