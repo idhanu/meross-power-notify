@@ -87,6 +87,11 @@ export class ChargeMonitor {
       decision = true;
     }
 
+    if (currentPrice && currentPrice.perKwh > settings.maxPrice) {
+      logger.info(`Current price is too high. Use maxPrice: ${settings.maxPrice}`);
+      decision = false;
+    }
+
     this.lastUpdate = {
       lowestPrices,
       averagePrice,

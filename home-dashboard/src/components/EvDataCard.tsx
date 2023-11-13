@@ -6,9 +6,11 @@ import {
   Alert,
   Stack,
   Grid,
+  Box,
 } from "@mui/material";
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
+import { ReactNode } from "react";
 
 export interface ElectricityPrices {
   result: Result;
@@ -43,7 +45,17 @@ export interface Settings {
   maxPrice: number;
   stateOfCharge: number;
   preferredPrice: number;
+  expireAt?: number;
 }
+
+const EvInfoCard = ({ value, label }: { value: ReactNode; label: string }) => (
+  <Grid item xs={3}>
+    <Stack>{label}</Stack>
+    <Stack>
+      <Typography variant="body2">{value}</Typography>
+    </Stack>
+  </Grid>
+);
 
 export const EvDataCard: React.FC = () => {
   const { isLoading, isError, data, error } = useQuery("amber_rates", () =>
@@ -73,27 +85,39 @@ export const EvDataCard: React.FC = () => {
           )}
         </Typography>
         {result && (
-          <Stack spacing={2}>
-            <Grid container spacing={1}>
-              <Grid item xs={3}>
-                <Stack>Average</Stack>
-                <Stack>
-                  <Typography variant="body2">
-                    {result.averagePrice.toFixed(2)}
-                  </Typography>
-                </Stack>
-              </Grid>
-              <Grid item xs={3}>
-                <Stack>Charging</Stack>
-                <Stack>
-                  <Typography variant="body2">
-                    {result.charge ? "Yes" : "No"}
-                  </Typography>
-                </Stack>
-              </Grid>
-            </Grid>
-            <div>Lowest Prices:</div>
-            <Typography variant="body2" component="div">
+          <Grid container spacing={1}>
+            <EvInfoCard
+              label="Charging"
+              value={
+                result.charge ? (
+                  <Box color="green">Yes</Box>
+                ) : (
+                  <Box color="red">No</Box>
+                )
+              }
+            />
+            <EvInfoCard
+              label="Average"
+              value={result.averagePrice.toFixed(2) + " kwh"}
+            />
+            <EvInfoCard
+              label="Current"
+              value={result.currentPrice.perKwh.toFixed(2) + " kwh"}
+            />
+            <EvInfoCard
+              label="Cutoff"
+              value={new Date(result.cutoff).toLocaleString()}
+            />
+            <EvInfoCard
+              label="Expiry"
+              value={
+                result.settings.expireAt
+                  ? new Date(result.settings.expireAt).toLocaleString()
+                  : "No expiry"
+              }
+            />
+            <Grid item xs={12}>
+              <div>Lowest Prices:</div>
               <Grid container spacing={1}>
                 {result.lowestPrices.map((price) => (
                   <Grid item xs={2}>
@@ -101,8 +125,8 @@ export const EvDataCard: React.FC = () => {
                   </Grid>
                 ))}
               </Grid>
-            </Typography>
-          </Stack>
+            </Grid>
+          </Grid>
         )}
       </CardContent>
     </Card>
