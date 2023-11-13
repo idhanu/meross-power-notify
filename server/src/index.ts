@@ -26,8 +26,14 @@ app.get('/api/amber/rates', async (_req: Request, res: Response) => {
   res.json({ result: await getUpcomingRates() });
 });
 
-app.post('/api/ev/settings', async (_req: Request, res: Response) => {
-  res.json({ result: await getUpcomingRates() });
+app.post('/api/ev/settings', async (req: Request, res: Response) => {
+  chargeMonitor.updateOverrideSettings(req.body);
+
+  res.json({ result: null });
+});
+
+app.get('/api/ev/settings', async (_req: Request, res: Response) => {
+  res.json({ result: chargeMonitor.getSettings() });
 });
 
 app.get('/api/logs', async (_req: Request, res: Response) => {

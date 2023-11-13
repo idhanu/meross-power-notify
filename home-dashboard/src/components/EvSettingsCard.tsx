@@ -6,42 +6,56 @@ import {
   Button,
   Stack,
   Slider,
+  Skeleton,
 } from "@mui/material";
-import { useMutation } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { request } from "../helpers/api";
 import SaveIcon from "@mui/icons-material/Save";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import Battery0BarIcon from "@mui/icons-material/Battery0Bar";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface FromValues {
-  time: number;
+  cutoffHour: number;
+  stateOfCharge: number;
 }
 
 export const EvSettingsCard: React.FC = () => {
   const [values, setValues] = useState<FromValues>({
-    time: 0,
+    cutoffHour: 15,
+    stateOfCharge: 90,
   });
+
+  const queryClient = useQueryClient();
 
   const update = <T extends keyof FromValues>(k: T, v: FromValues[T]) =>
     setValues({ ...values, [k]: v });
 
   const mutation = useMutation({
-    mutationFn: () =>
-      request("api/settings", {
+    mutationFn: (values: FromValues) =>
+      request("/api/ev/settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(values),
       }),
-    // onSuccess: () => {
-    //   // Invalidate and refetch
-    //   queryClient.invalidateQueries({ queryKey: ['todos'] })
-    // },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ev_settings"] });
+    },
   });
+
+  const { data, isLoading } = useQuery("ev_settings", () =>
+    request<{ result: FromValues }>("/api/ev/settings")
+  );
+
+  useEffect(() => {
+    if (data) {
+      setValues(data.result);
+    }
+  }, [data]);
 
   return (
     <Card sx={{ minWidth: 275 }}>
@@ -49,45 +63,55 @@ export const EvSettingsCard: React.FC = () => {
         <Typography variant="h6" pb={1}>
           EV Settings
         </Typography>
-        <Stack spacing={2}>
-          <Stack spacing={2} direction="row" alignItems="center">
-            <AccessTimeIcon />
-            <Slider
-              aria-label="Time"
-              value={values.time}
-              onChange={(_e, v) => update("time", v as number)}
-              min={0}
-              max={24}
-              valueLabelFormat={(value) =>
-                String(value).padStart(2, "0") + ":00"
-              }
-              valueLabelDisplay="auto"
-              marks
-            />
-            <AccessTimeFilledIcon />
+        {isLoading && (
+          <>
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+          </>
+        )}
+        {!isLoading && (
+          <Stack spacing={2}>
+            <Stack spacing={2} direction="row" alignItems="center">
+              <AccessTimeIcon />
+              <Slider
+                aria-label="Time"
+                value={values.cutoffHour}
+                onChange={(_e, v) => update("cutoffHour", v as number)}
+                min={0}
+                max={24}
+                valueLabelFormat={(value) =>
+                  String(value).padStart(2, "0") + ":00"
+                }
+                valueLabelDisplay="auto"
+                marks
+              />
+              <AccessTimeFilledIcon />
+            </Stack>
+            <Stack spacing={2} direction="row" alignItems="center">
+              <Battery0BarIcon />
+              <Slider
+                aria-label="Battery"
+                value={values.stateOfCharge}
+                onChange={(_e, v) => update("stateOfCharge", v as number)}
+                min={0}
+                max={100}
+                step={1}
+                valueLabelFormat={(value) => value + "%"}
+                valueLabelDisplay="auto"
+                marks
+              />
+              <BatteryFullIcon />
+            </Stack>
           </Stack>
-          <Stack spacing={2} direction="row" alignItems="center">
-            <Battery0BarIcon />
-            <Slider
-              aria-label="Battery"
-              value={values.time}
-              onChange={(_e, v) => update("time", v as number)}
-              min={0}
-              max={100}
-              step={1}
-              valueLabelFormat={(value) => value + "%"}
-              valueLabelDisplay="auto"
-              marks
-            />
-            <BatteryFullIcon />
-          </Stack>
-        </Stack>
+        )}
       </CardContent>
       <CardActions>
         <Button
           size="small"
-          onClick={() => mutation.mutate()}
+          onClick={() => mutation.mutate(values)}
           startIcon={<SaveIcon />}
+          disabled={mutation.isLoading}
         >
           Save
         </Button>

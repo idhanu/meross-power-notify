@@ -1,7 +1,7 @@
 import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
 import { setMerossPlug } from '../apis/meross';
-import { sleep } from '../utils/helpers';
+import { InterruptableSleep, sleep } from '../utils/helpers';
 
 export class ChargeMonitor {
   private settings = {
@@ -10,15 +10,15 @@ export class ChargeMonitor {
     stateOfCharge: 70,
     preferredPrice: 18,
   };
-  
+
+  private interruptableSleep = new InterruptableSleep();
+
   calculateTimeToNextMinute = (): number => {
     const now = new Date();
     const currentMinute = now.getMinutes();
     const targetMinute = (currentMinute > 30 ? 60 : 30) - currentMinute + 1;
     return targetMinute;
   };
-
-  
 
   private getUpcomingCutoff = () => {
     const now = new Date();
@@ -40,15 +40,24 @@ export class ChargeMonitor {
     expireAt: 0,
   };
 
-  private getSettings() {
+  getSettings() {
     return this.overrideSettings.expireAt > Date.now() ? { ...this.settings, ...this.overrideSettings } : this.settings;
+  }
+
+  updateOverrideSettings(settings: Partial<typeof this.settings>) {
+    this.overrideSettings = {
+      expireAt: Date.now() + 24 * 60 * 60 * 1000,
+      ...settings,
+    };
+
+    this.interruptableSleep.interrupt();
+    logger.info('Updated override settings', this.overrideSettings);
   }
 
   async shouldCharge() {
     const prices = await getUpcomingRates();
     const cutoff = this.getUpcomingCutoff();
     const settings = this.getSettings();
-    console.log('cutoff', new Date(cutoff).toLocaleString());
 
     const requiredTime = Math.ceil(((100 - settings.stateOfCharge) / 2.5) * 2);
 
@@ -69,16 +78,17 @@ export class ChargeMonitor {
 
     logger.info(
       'Decision based on: ' +
-      JSON.stringify(
-        {
-          lowestPrices,
-          averagePrice,
-          currentPrice: currentPrice.perKwh,
-          cutoff: new Date(cutoff).toLocaleString(undefined, { timeZone: 'Australia/Sydney' }),
-        },
-        null,
-        2,
-      ),
+        JSON.stringify(
+          {
+            lowestPrices: lowestPrices.join(', '),
+            averagePrice,
+            currentPrice: currentPrice.perKwh,
+            cutoff: new Date(cutoff).toLocaleString(undefined, { timeZone: 'Australia/Sydney' }),
+            settings,
+          },
+          null,
+          2,
+        ),
     );
 
     if (currentPrice && currentPrice.perKwh < averagePrice) {
@@ -98,13 +108,13 @@ export class ChargeMonitor {
           logger.info('Turn off charging');
           await setMerossPlug('EV', false);
         }
-        const next = this.calculateTimeToNextMinute()
-        logger.info(`Wait for ${next} minutes until next check`)
-        await sleep(next * 60 * 1000)
+        const next = this.calculateTimeToNextMinute();
+        logger.info(`Wait for ${next} minutes until next check`);
+        await this.interruptableSleep.sleep(next * 60 * 1000);
       } catch (e) {
-        logger.error(e)
-        logger.info(`Error occurred retrying after 1 minute`)
-        await sleep(60000)
+        logger.error(e);
+        logger.info(`Error occurred retrying after 1 minute`);
+        await this.interruptableSleep.sleep(60000);
       }
     }
   }

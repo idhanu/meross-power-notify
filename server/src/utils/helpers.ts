@@ -2,7 +2,7 @@ export const sleep = async (delay: number) => {
   await new Promise((resolve) => setTimeout(resolve, delay));
 };
 
-class InterruptableSleep {
+export class InterruptableSleep {
   private resolve: ((value: unknown) => void) | null = null;
 
   async sleep(delay: number) {
