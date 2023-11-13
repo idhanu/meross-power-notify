@@ -43,7 +43,7 @@ export const EvSettingsCard: React.FC = () => {
         body: JSON.stringify(values),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ev_settings"] });
+      queryClient.invalidateQueries({ queryKey: ["ev_settings", "logs"] });
     },
   });
 

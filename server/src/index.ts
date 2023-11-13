@@ -37,7 +37,7 @@ app.get('/api/ev/settings', async (_req: Request, res: Response) => {
 });
 
 app.get('/api/logs', async (_req: Request, res: Response) => {
-  const file = await readFile(path.join(__dirname, '../../logs.log'));
+  const file = await readFile(path.join(__dirname, '../../logs.log', 'r'));
   const lines = file.toString().split('\n');
   res.json({ result: lines.slice(lines.length - 30) });
 });
