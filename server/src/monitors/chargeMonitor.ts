@@ -1,6 +1,6 @@
 import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
-import { setMerossPlug } from '../apis/meross';
+import { getMerossPlug, setMerossPlug } from '../apis/meross';
 import { InterruptableSleep, sleep } from '../utils/helpers';
 
 export class ChargeMonitor {
@@ -42,17 +42,21 @@ export class ChargeMonitor {
     expireAt: 0,
   };
 
+  private overrideSettingsValid() {
+    return this.overrideSettings.expireAt <= Date.now();
+  }
+
   getSettings() {
-    return this.overrideSettings.expireAt > Date.now() ? { ...this.settings, ...this.overrideSettings } : this.settings;
+    return this.overrideSettingsValid() ? { ...this.settings, ...this.overrideSettings } : this.settings;
   }
 
   getLastUpdate() {
     return this.lastUpdate;
   }
 
-  updateOverrideSettings(settings: Partial<typeof this.settings>) {
+  updateOverrideSettings(settings: Partial<typeof this.settings>, updateExpiry = true) {
     this.overrideSettings = {
-      expireAt: Date.now() + 24 * 60 * 60 * 1000,
+      expireAt: updateExpiry ? Date.now() + 24 * 60 * 60 * 1000 : this.overrideSettings.expireAt,
       ...settings,
     };
 
@@ -70,7 +74,6 @@ export class ChargeMonitor {
     const validPrices = prices.filter((price) => price.endTimestamp <= cutoff).map((price) => price.perKwh);
     validPrices.sort();
     const lowestPrices = validPrices.slice(0, requiredTime);
-    
 
     const priceMax = Math.min(lowestPrices[lowestPrices.length - 1], settings.maxPrice);
     if (lowestPrices.length < requiredTime) {
@@ -91,7 +94,6 @@ export class ChargeMonitor {
     const predictedAveragePrice =
       predictedOnState.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / predictedOnState.length;
 
-
     this.lastUpdate = {
       lowestPrices,
       priceMax,
@@ -103,9 +105,28 @@ export class ChargeMonitor {
       predictedAveragePrice,
     };
 
-    logger.info('Decision based on: ' + JSON.stringify(this.lastUpdate));
+    logger.info(
+      'Decision based on: ' +
+        JSON.stringify({
+          ...this.lastUpdate,
+          lowestPrices: undefined,
+          cutoff: new Date(this.lastUpdate.cutoff as string).toLocaleDateString(),
+        }),
+    );
 
     return decision;
+  }
+
+  async recordPower() {
+    const settings = this.getSettings();
+    const plug = await getMerossPlug('EV');
+    if (plug.power > 10) {
+      const newStateOfCharge = settings.stateOfCharge + 1.25;
+      logger.info(`Charging is at ${plug.power}. New state of charge is ${newStateOfCharge}`);
+      if (this.overrideSettingsValid()) {
+        this.updateOverrideSettings({ stateOfCharge: newStateOfCharge }, false);
+      }
+    }
   }
 
   async monitor() {
@@ -114,6 +135,8 @@ export class ChargeMonitor {
         if (await this.shouldCharge()) {
           logger.info('Turn on charging');
           await setMerossPlug('EV', true);
+          await sleep(60000);
+          await this.recordPower();
         } else {
           logger.info('Turn off charging');
           await setMerossPlug('EV', false);
