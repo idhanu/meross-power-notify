@@ -16,7 +16,7 @@ export interface ElectricityPrices {
   result: Result;
 }
 export interface Result {
-  lowestPrices: number[];
+  lowestPrices: CurrentPrice[];
   priceMax: number;
   currentPrice: CurrentPrice;
   cutoff: number;
@@ -24,6 +24,8 @@ export interface Result {
   charge: boolean;
   predictedStateOfCharge: number;
   predictedAveragePrice: number;
+  isPluggedIn: boolean;
+  chargingTimes?: { time: number }[];
 }
 export interface CurrentPrice {
   type: string;
@@ -82,6 +84,12 @@ const toDate = (date: string | number) =>
     hour: "2-digit",
   });
 
+const toTime = (date: string | number) =>
+  new Date(date).toLocaleString("en-GB", {
+    minute: "2-digit",
+    hour: "2-digit",
+  });
+
 const calculateDaysSince = (targetDate: string): number => {
   const targetDateTime = new Date(targetDate);
   const currentDate = new Date();
@@ -122,6 +130,16 @@ export const EvDataCard: React.FC = () => {
             <EvInfoCard
               label="Charging"
               value={
+                result.isPluggedIn ? (
+                  <Box color="green">Yes</Box>
+                ) : (
+                  <Box color="red">No</Box>
+                )
+              }
+            />
+            <EvInfoCard
+              label="Should Charge"
+              value={
                 result.charge ? (
                   <Box color="green">Yes</Box>
                 ) : (
@@ -160,16 +178,38 @@ export const EvDataCard: React.FC = () => {
               xs={12}
               value={
                 <Grid container spacing={1}>
-                  {result.lowestPrices.map((price, i) => (
-                    <Grid item xs={2} key={i} sm={1}>
-                      <Typography variant="body2">
-                        {price.toFixed(1)}
+                  {result.lowestPrices.map((price) => (
+                    <Grid item xs={2} key={price.endTime} sm={1}>
+                      <Typography variant="body2" component="div">
+                        <Stack>
+                          <div>{price.perKwh.toFixed(1) + "¢"}</div>
+                          <div>{toTime(price.startTimestamp)}</div>
+                        </Stack>
                       </Typography>
                     </Grid>
                   ))}
                 </Grid>
               }
             />
+            {result.chargingTimes && (
+              <EvInfoCard
+                label="Charging Times"
+                xs={12}
+                value={
+                  <Grid container spacing={1}>
+                    {result.chargingTimes
+                      .slice(Math.min(result.chargingTimes.length - 15, 0))
+                      .map((time) => (
+                        <Grid item xs={2} key={time.time} sm={1}>
+                          <Typography variant="body2" component="div">
+                            {toTime(time.time)}
+                          </Typography>
+                        </Grid>
+                      ))}
+                  </Grid>
+                }
+              />
+            )}
           </Grid>
         )}
       </CardContent>

@@ -7,7 +7,7 @@ export class ChargeMonitor {
   private settings = {
     cutoffHour: 15,
     maxPrice: 30,
-    stateOfCharge: 70,
+    stateOfCharge: 85,
     preferredPrice: 18,
   };
 
@@ -46,8 +46,19 @@ export class ChargeMonitor {
     return this.overrideSettings.expireAt <= Date.now();
   }
 
-  getSettings() {
-    return this.overrideSettingsValid() ? { ...this.settings, ...this.overrideSettings } : this.settings;
+  getSettings(): typeof this.settings {
+    if (this.overrideSettingsValid()) {
+      return { ...this.settings, ...this.overrideSettings };
+    }
+
+    const now = new Date();
+    let cutoff = 15;
+    if ((now.getDay() === 5 && now.getHours() >= 15) || (now.getDay() === 6 && now.getHours() < 9)) {
+      cutoff = 9;
+    } else if ((now.getDay() === 6 && now.getHours() >= 9) || (now.getDay() === 0 && now.getHours() < 10)) {
+      cutoff = 10;
+    }
+    return { ...this.settings, cutoffHour: cutoff };
   }
 
   getLastUpdate() {
@@ -61,7 +72,7 @@ export class ChargeMonitor {
     };
 
     this.interruptableSleep.interrupt();
-    logger.info('Updated override settings', this.overrideSettings);
+    logger.info(`Updated override settings: ${JSON.stringify(this.overrideSettings)}`);
   }
 
   async shouldCharge() {
@@ -69,13 +80,13 @@ export class ChargeMonitor {
     const cutoff = this.getUpcomingCutoff();
     const settings = this.getSettings();
 
-    const requiredTime = Math.ceil(((100 - settings.stateOfCharge) / 2.5) * 2);
+    const requiredTime = Math.ceil((100 - settings.stateOfCharge) / 1.25);
 
-    const validPrices = prices.filter((price) => price.endTimestamp <= cutoff).map((price) => price.perKwh);
-    validPrices.sort();
+    const validPrices = prices.filter((price) => price.endTimestamp <= cutoff);
+    validPrices.sort((a, b) => a.perKwh - b.perKwh);
     const lowestPrices = validPrices.slice(0, requiredTime);
 
-    const priceMax = Math.min(lowestPrices[lowestPrices.length - 1], settings.maxPrice);
+    const priceMax = Math.min(lowestPrices[lowestPrices.length - 1].perKwh, settings.maxPrice);
     if (lowestPrices.length < requiredTime) {
       logger.info(`Not enough prices available to calculate average price.`);
     }
@@ -89,10 +100,11 @@ export class ChargeMonitor {
       decision = true;
     }
 
-    const predictedOnState = validPrices.filter((price) => price <= priceMax);
+    const predictedOnState = validPrices.filter((price) => price.perKwh <= priceMax);
     const predictedStateOfCharge = Math.min(predictedOnState.length * 1.25 + settings.stateOfCharge, 100);
     const predictedAveragePrice =
-      predictedOnState.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / predictedOnState.length;
+      predictedOnState.reduce((accumulator, currentValue) => accumulator + currentValue.perKwh, 0) /
+      predictedOnState.length;
 
     this.lastUpdate = {
       lowestPrices,
@@ -110,7 +122,8 @@ export class ChargeMonitor {
         JSON.stringify({
           ...this.lastUpdate,
           lowestPrices: undefined,
-          cutoff: new Date(this.lastUpdate.cutoff as string).toLocaleDateString(),
+          currentPrice: currentPrice.perKwh,
+          cutoff: new Date(cutoff).toLocaleDateString(),
         }),
     );
 
@@ -120,13 +133,15 @@ export class ChargeMonitor {
   async recordPower() {
     const settings = this.getSettings();
     const plug = await getMerossPlug('EV');
-    if (plug.power > 10) {
+    if (plug.power > 1000) {
       const newStateOfCharge = settings.stateOfCharge + 1.25;
       logger.info(`Charging is at ${plug.power}. New state of charge is ${newStateOfCharge}`);
       if (this.overrideSettingsValid()) {
         this.updateOverrideSettings({ stateOfCharge: newStateOfCharge }, false);
       }
+      return true;
     }
+    return false;
   }
 
   async monitor() {
@@ -136,10 +151,17 @@ export class ChargeMonitor {
           logger.info('Turn on charging');
           await setMerossPlug('EV', true);
           await sleep(60000);
-          await this.recordPower();
+          const isPluggedIn = await this.recordPower();
+          if (this.lastUpdate) {
+            this.lastUpdate.isPluggedIn = isPluggedIn;
+            this.lastUpdate.chargingTimes = [...((this.lastUpdate.charges as []) || []), { time: Date.now() }];
+          }
         } else {
           logger.info('Turn off charging');
           await setMerossPlug('EV', false);
+          if (this.lastUpdate) {
+            this.lastUpdate.isPluggedIn = false;
+          }
         }
         const next = this.calculateTimeToNextMinute();
         logger.info(`Wait for ${next} minutes until next check`);

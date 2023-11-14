@@ -13,6 +13,9 @@ export interface PlugPowerConsumption {
 }
 
 export const getMerossPlug = async (deviceName: string) => {
-  const res = await axios.get<{ results: PlugPowerConsumption }>('/api/meross/plug', { baseURL });
-  return res.data.results;
+  const res = await axios.get<{ result: PlugPowerConsumption }>('/api/meross/plug', {
+    baseURL,
+    params: { name: deviceName },
+  });
+  return res.data.result;
 };
