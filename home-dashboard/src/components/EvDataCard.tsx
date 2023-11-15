@@ -11,22 +11,9 @@ import {
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
 import { ReactNode } from "react";
+import { ChargeMonitorLastUpdate } from "../../../server/src/models/chargeMonitor";
 
-export interface ElectricityPrices {
-  result: Result;
-}
-export interface Result {
-  lowestPrices: CurrentPrice[];
-  priceMax: number;
-  currentPrice: CurrentPrice;
-  cutoff: number;
-  settings: Settings;
-  charge: boolean;
-  predictedStateOfCharge: number;
-  predictedAveragePrice: number;
-  isPluggedIn: boolean;
-  chargingTimes?: { time: number; price: number }[];
-}
+
 export interface CurrentPrice {
   type: string;
   date: string;
@@ -43,13 +30,6 @@ export interface CurrentPrice {
   estimate: boolean;
   startTimestamp: number;
   endTimestamp: number;
-}
-export interface Settings {
-  cutoffHour: number;
-  maxPrice: number;
-  stateOfCharge: number;
-  preferredPrice: number;
-  expireAt?: number;
 }
 
 const EvInfoCard = ({
@@ -100,7 +80,7 @@ const calculateDaysSince = (targetDate: string): number => {
 
 export const EvDataCard: React.FC = () => {
   const { isLoading, isError, data, error } = useQuery("ev_last_update", () =>
-    request<ElectricityPrices>("/api/ev/last_update")
+    request<{ result: ChargeMonitorLastUpdate }>("/api/ev/last_update")
   );
 
   const result = data?.result;

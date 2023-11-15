@@ -2,17 +2,34 @@ import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
 import { getMerossPlug, setMerossPlug } from '../apis/meross';
 import { InterruptableSleep, sleep } from '../utils/helpers';
+import { ChargeMonitorLastUpdate, ChargeMonitorSettings } from '../models/chargeMonitor';
 
 export class ChargeMonitor {
-  private settings = {
+  private settings: ChargeMonitorSettings = {
     cutoffHour: 15,
     maxPrice: 30,
     stateOfCharge: 85,
     preferredPrice: 18,
   };
 
-  private lastUpdate: Record<string, unknown> | null = null;
+  private lastUpdate: Partial<ChargeMonitorLastUpdate> = {};
+
   private interruptableSleep = new InterruptableSleep();
+
+  setLastUpdate(values: Partial<ChargeMonitorLastUpdate>) {
+    if (values.chargingTimes) {
+      if (this.lastUpdate.chargingTimes) {
+        values.chargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
+      } else {
+        values.chargingTimes = values.chargingTimes;
+      }
+    }
+
+    this.lastUpdate = {
+      ...this.lastUpdate,
+      ...values,
+    };
+  }
 
   calculateTimeToNextMinute = (): number => {
     const now = new Date();
@@ -106,8 +123,7 @@ export class ChargeMonitor {
       predictedOnState.reduce((accumulator, currentValue) => accumulator + currentValue.perKwh, 0) /
       predictedOnState.length;
 
-    this.lastUpdate = {
-      ...this.lastUpdate,
+    this.setLastUpdate({
       lowestPrices,
       priceMax,
       currentPrice,
@@ -116,17 +132,7 @@ export class ChargeMonitor {
       charge: decision,
       predictedStateOfCharge,
       predictedAveragePrice,
-    };
-
-    logger.info(
-      'Decision based on: ' +
-        JSON.stringify({
-          ...this.lastUpdate,
-          lowestPrices: undefined,
-          currentPrice: currentPrice.perKwh,
-          cutoff: new Date(cutoff).toLocaleDateString(),
-        }),
-    );
+    });
 
     return decision;
   }
@@ -153,16 +159,16 @@ export class ChargeMonitor {
           await setMerossPlug('EV', true);
           await this.interruptableSleep.sleep(60000);
           const isPluggedIn = await this.recordPower();
-          if (this.lastUpdate) {
-            this.lastUpdate.isPluggedIn = isPluggedIn;
-            this.lastUpdate.chargingTimes = [...((this.lastUpdate.chargingTimes as []) || []), { time: Date.now(), price: (this.lastUpdate.currentPrice as {perKwh: number}).perKwh }];
-          }
+          this.setLastUpdate({
+            isPluggedIn: isPluggedIn,
+            chargingTimes: [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }],
+          });
         } else {
           logger.info('Turn off charging');
           await setMerossPlug('EV', false);
-          if (this.lastUpdate) {
-            this.lastUpdate.isPluggedIn = false;
-          }
+          this.setLastUpdate({
+            isPluggedIn: false,
+          });
         }
         const next = this.calculateTimeToNextMinute();
         logger.info(`Wait for ${next} minutes until next check`);

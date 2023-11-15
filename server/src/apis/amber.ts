@@ -1,33 +1,13 @@
 import axios from 'axios';
 import { AMBER_API_KEY } from '../utils/config';
 import logger from '../pino';
+import { AmberRate } from '../models/amber';
 
 // Set the base API endpoint URL
 const amberBaseUrl = 'https://api.amber.com.au/v1';
 // Define the specific endpoint for prices
 const sitesEndpoint = '/sites/01FWZA56KHW0TTQNA8478MT5J1/prices/current?resolution=30&next=48';
 
-export interface AmberRate {
-  type: 'CurrentInterval' | 'ForecastInterval';
-  date: string;
-  duration: number;
-  startTime: string;
-  endTime: string;
-  nemTime: string;
-  perKwh: number;
-  renewables: number;
-  spotPerKwh: number;
-  channelType: string;
-  spikeStatus: string;
-  descriptor: string;
-  estimate?: boolean | null;
-  range?: AmberRateRange | null;
-}
-
-interface AmberRateRange {
-  min: number;
-  max: number;
-}
 
 export const getUpcomingRates = async () => {
   const url = `${amberBaseUrl}${sitesEndpoint}`;
