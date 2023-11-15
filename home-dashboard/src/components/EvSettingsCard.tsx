@@ -42,7 +42,7 @@ export const EvSettingsCard: React.FC = () => {
         },
         body: JSON.stringify(values),
       }),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["ev_settings", "ev_last_update"],
       });

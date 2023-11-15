@@ -14,24 +14,6 @@ import { ReactNode } from "react";
 import { ChargeMonitorLastUpdate } from "../../../server/src/models/chargeMonitor";
 
 
-export interface CurrentPrice {
-  type: string;
-  date: string;
-  duration: number;
-  startTime: string;
-  endTime: string;
-  nemTime: string;
-  perKwh: number;
-  renewables: number;
-  spotPerKwh: number;
-  channelType: string;
-  spikeStatus: string;
-  descriptor: string;
-  estimate: boolean;
-  startTimestamp: number;
-  endTimestamp: number;
-}
-
 const EvInfoCard = ({
   value,
   label,

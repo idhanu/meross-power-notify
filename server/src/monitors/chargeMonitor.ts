@@ -157,7 +157,7 @@ export class ChargeMonitor {
         if (await this.shouldCharge()) {
           logger.info('Turn on charging');
           await setMerossPlug('EV', true);
-          await this.interruptableSleep.sleep(60000);
+          await this.interruptableSleep.sleep(20000);
           const isPluggedIn = await this.recordPower();
           this.setLastUpdate({
             isPluggedIn: isPluggedIn,
