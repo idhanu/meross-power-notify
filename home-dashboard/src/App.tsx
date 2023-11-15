@@ -34,10 +34,10 @@ export function App() {
                 <EvDataCard />
               </Grid>
               <Grid item xs={12}>
-                <LogsCard />
+                <EvSettingsCard />
               </Grid>
               <Grid item xs={12}>
-                <EvSettingsCard />
+                <LogsCard />
               </Grid>
             </Grid>
           </Box>

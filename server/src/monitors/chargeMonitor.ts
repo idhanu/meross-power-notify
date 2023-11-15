@@ -43,7 +43,7 @@ export class ChargeMonitor {
   };
 
   private overrideSettingsValid() {
-    return this.overrideSettings.expireAt <= Date.now();
+    return this.overrideSettings.expireAt >= Date.now();
   }
 
   getSettings(): typeof this.settings {
@@ -107,12 +107,12 @@ export class ChargeMonitor {
       predictedOnState.length;
 
     this.lastUpdate = {
+      ...this.lastUpdate,
       lowestPrices,
       priceMax,
       currentPrice,
       cutoff,
       settings,
-      overrideExpireAt: this.overrideSettingsValid() ? this.overrideSettings.expireAt : 0,
       charge: decision,
       predictedStateOfCharge,
       predictedAveragePrice,

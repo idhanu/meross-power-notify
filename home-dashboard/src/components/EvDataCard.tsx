@@ -25,7 +25,7 @@ export interface Result {
   predictedStateOfCharge: number;
   predictedAveragePrice: number;
   isPluggedIn: boolean;
-  chargingTimes?: { time: number }[];
+  chargingTimes?: { time: number; price: number }[];
 }
 export interface CurrentPrice {
   type: string;
@@ -199,10 +199,13 @@ export const EvDataCard: React.FC = () => {
                   <Grid container spacing={1}>
                     {result.chargingTimes
                       .slice(Math.min(result.chargingTimes.length - 15, 0))
-                      .map((time) => (
-                        <Grid item xs={2} key={time.time} sm={1}>
+                      .map((record) => (
+                        <Grid item xs={2} key={record.time} sm={1}>
                           <Typography variant="body2" component="div">
-                            {toTime(time.time)}
+                            <Stack>
+                              <div>{record.price.toFixed(1) + "¢"}</div>
+                              <div>{toTime(record.time)}</div>
+                            </Stack>
                           </Typography>
                         </Grid>
                       ))}

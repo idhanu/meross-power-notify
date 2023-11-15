@@ -43,7 +43,13 @@ export const LogsCard: React.FC = () => {
             </>
           )}
           {shownLogs?.map((log: string, i) => (
-            <Box key={i} pb={1} whiteSpace="break-spaces" m={0}>
+            <Box
+              key={i}
+              pb={1}
+              whiteSpace="break-spaces"
+              m={0}
+              sx={{ overflowX: "auto" }}
+            >
               {log}
             </Box>
           ))}

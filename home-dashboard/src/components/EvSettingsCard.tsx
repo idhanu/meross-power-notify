@@ -112,7 +112,6 @@ export const EvSettingsCard: React.FC = () => {
       </CardContent>
       <CardActions>
         <Button
-          size="small"
           onClick={() => mutation.mutate(values)}
           startIcon={<SaveIcon />}
           disabled={mutation.isLoading}
