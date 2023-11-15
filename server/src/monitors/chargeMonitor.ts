@@ -67,8 +67,8 @@ export class ChargeMonitor {
 
   updateOverrideSettings(settings: Partial<typeof this.settings>, updateExpiry = true) {
     this.overrideSettings = {
-      expireAt: updateExpiry ? Date.now() + 24 * 60 * 60 * 1000 : this.overrideSettings.expireAt,
       ...settings,
+      expireAt: updateExpiry ? Date.now() + 24 * 60 * 60 * 1000 : this.overrideSettings.expireAt,
     };
 
     this.interruptableSleep.interrupt();
@@ -86,7 +86,7 @@ export class ChargeMonitor {
     validPrices.sort((a, b) => a.perKwh - b.perKwh);
     const lowestPrices = validPrices.slice(0, requiredTime);
 
-    const priceMax = Math.min(lowestPrices[lowestPrices.length - 1].perKwh, settings.maxPrice);
+    const priceMax = Math.min(lowestPrices[lowestPrices.length - 1].perKwh + 1, settings.maxPrice);
     if (lowestPrices.length < requiredTime) {
       logger.info(`Not enough prices available to calculate average price.`);
     }
@@ -112,6 +112,7 @@ export class ChargeMonitor {
       currentPrice,
       cutoff,
       settings,
+      overrideExpireAt: this.overrideSettingsValid() ? this.overrideSettings.expireAt : 0,
       charge: decision,
       predictedStateOfCharge,
       predictedAveragePrice,
@@ -150,11 +151,11 @@ export class ChargeMonitor {
         if (await this.shouldCharge()) {
           logger.info('Turn on charging');
           await setMerossPlug('EV', true);
-          await sleep(60000);
+          await this.interruptableSleep.sleep(60000);
           const isPluggedIn = await this.recordPower();
           if (this.lastUpdate) {
             this.lastUpdate.isPluggedIn = isPluggedIn;
-            this.lastUpdate.chargingTimes = [...((this.lastUpdate.charges as []) || []), { time: Date.now() }];
+            this.lastUpdate.chargingTimes = [...((this.lastUpdate.chargingTimes as []) || []), { time: Date.now(), price: (this.lastUpdate.currentPrice as {perKwh: number}).perKwh }];
           }
         } else {
           logger.info('Turn off charging');
