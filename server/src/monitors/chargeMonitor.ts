@@ -97,7 +97,7 @@ export class ChargeMonitor {
     const cutoff = this.getUpcomingCutoff();
     const settings = this.getSettings();
 
-    const requiredTime = Math.ceil((100 - settings.stateOfCharge) / 1.25);
+    const requiredTime = Math.ceil((100 - settings.stateOfCharge + 0.1) / 1.25);
 
     const validPrices = prices.filter((price) => price.endTimestamp <= cutoff);
     validPrices.sort((a, b) => a.perKwh - b.perKwh);
@@ -141,7 +141,7 @@ export class ChargeMonitor {
     const settings = this.getSettings();
     const plug = await getMerossPlug('EV');
     if (plug.power > 1000) {
-      const newStateOfCharge = settings.stateOfCharge + 1.25;
+      const newStateOfCharge = Math.min(settings.stateOfCharge + 1.25, 100);
       logger.info(`Charging is at ${plug.power}. New state of charge is ${newStateOfCharge}`);
       if (this.overrideSettingsValid()) {
         this.updateOverrideSettings({ stateOfCharge: newStateOfCharge }, false);
@@ -161,7 +161,7 @@ export class ChargeMonitor {
           const isPluggedIn = await this.recordPower();
           this.setLastUpdate({
             isPluggedIn: isPluggedIn,
-            chargingTimes: [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }],
+            chargingTimes: isPluggedIn ? [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }] : undefined,
           });
         } else {
           logger.info('Turn off charging');
