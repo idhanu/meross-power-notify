@@ -22,33 +22,39 @@ export class WashingMachineMonitor {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const instantConsumption = await getMerossPlug('Synology');
+      try {
+        const instantConsumption = await getMerossPlug('Synology');
 
-      this.record.record(instantConsumption.power);
+        this.record.record(instantConsumption.power);
 
-      if (instantConsumption.power > THRESHOLD) {
-        logger.info(`Washing machine is running with ${instantConsumption.power}W`);
-        delay = RUNNING_DELAY;
+        if (instantConsumption.power > THRESHOLD) {
+          logger.info(`Washing machine is running with ${instantConsumption.power}W`);
+          delay = RUNNING_DELAY;
+        }
+
+        if (this.record.turnOffDetected) {
+          logger.info('Washing machine has stopped. Notifying display.');
+          await addNotifications('led-display1', {
+            notifications: [
+              {
+                id: 'washing-machine',
+                imageData: WASHING_MACHINE_IMAGE,
+                brightness: 40,
+                blink: true,
+              },
+            ],
+          });
+
+          delay = STOPPED_DELAY;
+          this.record.clear();
+        }
+
+        await sleep(delay * 1000);
+      } catch (e) {
+        logger.error(e);
+        logger.warn('Retrying in 1 minute');
+        await sleep(1000 * 60);
       }
-
-      if (this.record.turnOffDetected) {
-        logger.info('Washing machine has stopped. Notifying display.');
-        await addNotifications('led-display1', {
-          notifications: [
-            {
-              id: 'washing-machine',
-              imageData: WASHING_MACHINE_IMAGE,
-              brightness: 40,
-              blink: true,
-            },
-          ],
-        });
-
-        delay = STOPPED_DELAY;
-        this.record.clear();
-      }
-
-      await sleep(delay * 1000);
     }
   }
 }
