@@ -38,9 +38,10 @@ async def get_meross():
     global manager
     email = MEROSS_EMAIL
     password = MEROSS_PASSWORD
+
     # Setup the HTTP client API from user-password
     http_api_client = await MerossHttpClient.async_from_user_password(
-        email=email, password=password
+        api_base_url="https://iotx-ap.meross.com", email=email, password=password
     )
 
     # Setup and start the device manager

@@ -124,7 +124,7 @@ async def run_server():
 
     logger.info(f"Server running on http://{ip}:{PORT}")
 
-    if server_only:
+    while True:
         await asyncio.sleep(34343434)
 
 

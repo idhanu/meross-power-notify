@@ -22,7 +22,7 @@ async def main():
     manager, http_api_client = await get_meross()
 
     try:
-        await asyncio.gather(run_server(), washing_machine_monitor())
+        await asyncio.gather(run_server())
     finally:
         # Close the manager and logout from http_api
         logger.info("\n\nClosing connection. Please wait...")
