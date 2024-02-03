@@ -1,7 +1,7 @@
 import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
 import { getMerossPlug, setMerossPlug } from '../apis/meross';
-import { InterruptableSleep, sleep } from '../utils/helpers';
+import { InterruptableSleep } from '../utils/helpers';
 import { ChargeMonitorLastUpdate, ChargeMonitorSettings } from '../models/chargeMonitor';
 
 export class ChargeMonitor {
@@ -17,12 +17,8 @@ export class ChargeMonitor {
   private interruptableSleep = new InterruptableSleep();
 
   setLastUpdate(values: Partial<ChargeMonitorLastUpdate>) {
-    if (values.chargingTimes) {
-      if (this.lastUpdate.chargingTimes) {
-        values.chargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
-      } else {
-        values.chargingTimes = values.chargingTimes;
-      }
+    if (values.chargingTimes && this.lastUpdate.chargingTimes) {
+      values.chargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
     }
 
     this.lastUpdate = {
@@ -43,8 +39,6 @@ export class ChargeMonitor {
     const currentHour = now.getHours();
 
     const settings = this.getSettings();
-    // If the current hour is equal to or greater than the target hour,
-    // set the date to the next day
     if (currentHour >= settings.cutoffHour) {
       now.setDate(now.getDate() + 1);
     }
@@ -70,6 +64,7 @@ export class ChargeMonitor {
 
     const now = new Date();
     let cutoff = 15;
+
     if ((now.getDay() === 5 && now.getHours() >= 15) || (now.getDay() === 6 && now.getHours() < 9)) {
       cutoff = 9;
     } else if ((now.getDay() === 6 && now.getHours() >= 9) || (now.getDay() === 0 && now.getHours() < 10)) {
@@ -152,6 +147,7 @@ export class ChargeMonitor {
   }
 
   async monitor() {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         if (await this.shouldCharge()) {
@@ -161,7 +157,9 @@ export class ChargeMonitor {
           const isPluggedIn = await this.recordPower();
           this.setLastUpdate({
             isPluggedIn: isPluggedIn,
-            chargingTimes: isPluggedIn ? [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }] : undefined,
+            chargingTimes: isPluggedIn
+              ? [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }]
+              : undefined,
           });
         } else {
           logger.info('Turn off charging');

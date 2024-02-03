@@ -92,7 +92,13 @@ export const EvSettingsCard: React.FC = () => {
               <AccessTimeFilledIcon />
             </Stack>
             <Stack spacing={2} direction="row" alignItems="center">
-              <Battery0BarIcon />
+              <div
+                onClick={() =>
+                  update("stateOfCharge", values.stateOfCharge - 1)
+                }
+              >
+                <Battery0BarIcon />
+              </div>
               <Slider
                 aria-label="Battery"
                 value={values.stateOfCharge}
@@ -105,7 +111,13 @@ export const EvSettingsCard: React.FC = () => {
                 marks
               />
               <Typography variant="body2">{values.stateOfCharge}%</Typography>
-              <BatteryFullIcon />
+              <div
+                onClick={() =>
+                  update("stateOfCharge", values.stateOfCharge + 1)
+                }
+              >
+                <BatteryFullIcon />
+              </div>
             </Stack>
           </Stack>
         )}
