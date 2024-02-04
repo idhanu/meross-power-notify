@@ -7,7 +7,7 @@ import { Tracker } from './washingMachineTracker';
 
 const RUNNING_DELAY = 180;
 const STOPPED_DELAY = 1800;
-const THRESHOLD = 100;
+const THRESHOLD = 10;
 
 export class WashingMachineMonitor {
   private record = new Tracker({
@@ -25,10 +25,13 @@ export class WashingMachineMonitor {
       try {
         const instantConsumption = await getMerossPlug('Synology');
 
+        logger.info(`Washing machine power: ${instantConsumption.power}W`);
         this.record.record(instantConsumption.power);
 
         if (instantConsumption.power > THRESHOLD) {
-          logger.info(`Washing machine is running with ${instantConsumption.power}W`);
+          logger.info(
+            `${THRESHOLD}W threshold exceeded with ${instantConsumption.power}. Setting running delay ${RUNNING_DELAY}ms.`,
+          );
           delay = RUNNING_DELAY;
         }
 
