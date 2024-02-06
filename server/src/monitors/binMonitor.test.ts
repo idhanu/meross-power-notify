@@ -64,4 +64,18 @@ describe('BinMonitor', () => {
       ],
     });
   });
+
+  it('should calculate correct delay', () => {
+    jest.setSystemTime(new Date('2024-02-13 17:00:00'));
+    expect(binMonitor.getDelay()).toBe(1000 * 60 * 60);
+
+    jest.setSystemTime(new Date('2024-02-13 17:01:00'));
+    expect(binMonitor.getDelay()).toBe(1000 * 60 * 60);
+
+    jest.setSystemTime(new Date('2024-02-13 17:02:00'));
+    expect(binMonitor.getDelay()).toBe(1000 * 60 * 59);
+
+    jest.setSystemTime(new Date('2024-02-13 17:59:59'));
+    expect(binMonitor.getDelay()).toBe(1000 * 60 * 2);
+  });
 });

@@ -34,12 +34,21 @@ export class BinMonitor {
     }
   }
 
+  getDelay() {
+    const date = new Date();
+    if (date.getMinutes() < 1) {
+      return 1000 * 60 * 60;
+    }
+
+    return 1000 * 60 * (61 - date.getMinutes());
+  }
+
   async monitor() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await this.checkBinDateAndNotify();
-        await sleep(1000 * 60 * 60);
+        await sleep(this.getDelay());
       } catch (e) {
         logger.error(e);
         // Retry in 1 minute
