@@ -52,7 +52,7 @@ app.get('/api/logs', async (_req: Request, res: Response) => {
 
 app.use(errorResponseMiddleware);
 
-// chargeMonitor.monitor();
+chargeMonitor.monitor();
 washingMachineMonitor.monitor();
 binMonitor.monitor();
 /* istanbul ignore next */
