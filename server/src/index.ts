@@ -5,13 +5,13 @@ import { errorResponseMiddleware } from './middleware/errorHandler';
 import { commonHeadersMiddleware } from './middleware/commonHeaders';
 import logger from './pino';
 import { getUpcomingRates } from './apis/amber';
-// import { ChargeMonitor } from './monitors/chargeMonitor';
+import { ChargeMonitor } from './monitors/chargeMonitor';
 import path from 'path';
 import { readFile } from 'fs/promises';
 import { WashingMachineMonitor } from './monitors/washingMachineMonitor';
 import { BinMonitor } from './monitors/binMonitor';
 
-// const chargeMonitor = new ChargeMonitor();
+const chargeMonitor = new ChargeMonitor();
 const washingMachineMonitor = new WashingMachineMonitor();
 const binMonitor = new BinMonitor();
 
@@ -30,19 +30,19 @@ app.get('/api/amber/rates', async (_req: Request, res: Response) => {
   res.json({ result: await getUpcomingRates() });
 });
 
-// app.post('/api/ev/settings', async (req: Request, res: Response) => {
-//   chargeMonitor.updateOverrideSettings(req.body);
+app.post('/api/ev/settings', async (req: Request, res: Response) => {
+  chargeMonitor.updateOverrideSettings(req.body);
 
-//   res.json({ result: null });
-// });
+  res.json({ result: null });
+});
 
-// app.get('/api/ev/last_update', async (req: Request, res: Response) => {
-//   res.json({ result: chargeMonitor.getLastUpdate() });
-// });
+app.get('/api/ev/last_update', async (req: Request, res: Response) => {
+  res.json({ result: chargeMonitor.getLastUpdate() });
+});
 
-// app.get('/api/ev/settings', async (_req: Request, res: Response) => {
-//   res.json({ result: chargeMonitor.getSettings() });
-// });
+app.get('/api/ev/settings', async (_req: Request, res: Response) => {
+  res.json({ result: chargeMonitor.getSettings() });
+});
 
 app.get('/api/logs', async (_req: Request, res: Response) => {
   const file = await readFile(path.join(__dirname, '../../server.log'), { flag: 'r' });
