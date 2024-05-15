@@ -7,7 +7,7 @@ import { ChargeMonitorLastUpdate, ChargeMonitorSettings } from '../models/charge
 export class ChargeMonitor {
   private settings: ChargeMonitorSettings = {
     cutoffHour: 15,
-    maxPrice: 30,
+    maxPrice: 35,
     stateOfCharge: 85,
     preferredPrice: 18,
   };
