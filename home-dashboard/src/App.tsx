@@ -1,11 +1,10 @@
-import {
-  Box,
-  Container,
-  Grid,
-  ThemeProvider,
-  createTheme,
-  useMediaQuery,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import { createTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import ThemeProvider from "@mui/material/styles/ThemeProvider";
+
 import { NavBar } from "./components/NavBar";
 import { LogsCard } from "./components/LogsCard";
 import { EvSettingsCard } from "./components/EvSettingsCard";

@@ -1,13 +1,12 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Alert,
-  Box,
-  Skeleton,
-} from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import Alert from "@mui/material/Alert";
+import CardActions from "@mui/material/CardActions";
+import Button from "@mui/material/Button";
+
 import { useQuery } from "react-query";
 import { useState } from "react";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";

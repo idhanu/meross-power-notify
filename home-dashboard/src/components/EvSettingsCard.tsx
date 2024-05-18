@@ -1,13 +1,12 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Stack,
-  Slider,
-  Skeleton,
-} from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import Slider from "@mui/material/Slider";
+import CardActions from "@mui/material/CardActions";
+import Button from "@mui/material/Button";
+
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { request } from "../helpers/api";
 import SaveIcon from "@mui/icons-material/Save";

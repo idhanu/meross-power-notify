@@ -1,18 +1,16 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Skeleton,
-  Alert,
-  Stack,
-  Grid,
-  Box,
-} from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
 import { ReactNode } from "react";
 import { ChargeMonitorLastUpdate } from "../../../server/src/models/chargeMonitor";
-
 
 const EvInfoCard = ({
   value,
