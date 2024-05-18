@@ -15,17 +15,21 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import Battery0BarIcon from "@mui/icons-material/Battery0Bar";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
+import PriceChangeIcon from "@mui/icons-material/MonetizationOn";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { useEffect, useState } from "react";
 
 interface FromValues {
   cutoffHour: number;
   stateOfCharge: number;
+  maxPrice: number;
 }
 
 export const EvSettingsCard: React.FC = () => {
   const [values, setValues] = useState<FromValues>({
     cutoffHour: 15,
     stateOfCharge: 90,
+    maxPrice: 30,
   });
 
   const queryClient = useQueryClient();
@@ -118,6 +122,21 @@ export const EvSettingsCard: React.FC = () => {
               >
                 <BatteryFullIcon />
               </div>
+            </Stack>
+            <Stack spacing={2} direction="row" alignItems="center">
+              <AttachMoneyIcon />
+              <Slider
+                aria-label="Battery"
+                value={values.maxPrice}
+                onChange={(_e, v) => update("maxPrice", v as number)}
+                min={0}
+                max={100}
+                step={1}
+                valueLabelFormat={(value) => "¢" + value}
+                valueLabelDisplay="auto"
+                marks
+              />
+              <PriceChangeIcon />
             </Stack>
           </Stack>
         )}

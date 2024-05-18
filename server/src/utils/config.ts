@@ -1,4 +1,3 @@
-import exp from 'constants';
 import dotenv from 'dotenv';
 
 type ENVIRONMENTS = 'local' | 'test' | 'prod';
