@@ -114,7 +114,6 @@ export const EvDataCard: React.FC = () => {
               label="Current Price"
               value={toPrice(result.currentPrice.perKwh)}
             />
-            <EvInfoCard label="Cutoff Time" value={toDate(result.cutoff)} />
             <EvInfoCard
               label="Settings Expiry"
               value={

@@ -19,14 +19,12 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { useEffect, useState } from "react";
 
 interface FromValues {
-  cutoffHour: number;
   stateOfCharge: number;
   maxPrice: number;
 }
 
 export const EvSettingsCard: React.FC = () => {
   const [values, setValues] = useState<FromValues>({
-    cutoffHour: 15,
     stateOfCharge: 90,
     maxPrice: 30,
   });
@@ -78,23 +76,6 @@ export const EvSettingsCard: React.FC = () => {
         {!isLoading && (
           <Stack spacing={2}>
             <Stack spacing={2} direction="row" alignItems="center">
-              <AccessTimeIcon />
-              <Slider
-                aria-label="Time"
-                value={values.cutoffHour}
-                onChange={(_e, v) => update("cutoffHour", v as number)}
-                min={0}
-                max={24}
-                valueLabelFormat={(value) =>
-                  String(value).padStart(2, "0") + ":00"
-                }
-                valueLabelDisplay="auto"
-                marks
-              />
-              <Typography variant="body2">{values.cutoffHour}:00</Typography>
-              <AccessTimeFilledIcon />
-            </Stack>
-            <Stack spacing={2} direction="row" alignItems="center">
               <div
                 onClick={() =>
                   update("stateOfCharge", values.stateOfCharge - 1)
@@ -113,7 +94,6 @@ export const EvSettingsCard: React.FC = () => {
                 valueLabelDisplay="auto"
                 marks
               />
-              <Typography variant="body2">{values.stateOfCharge}%</Typography>
               <div
                 onClick={() =>
                   update("stateOfCharge", values.stateOfCharge + 1)
