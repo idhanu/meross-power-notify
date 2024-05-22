@@ -6,10 +6,8 @@ interface PriceTime {
 }
 
 export interface ChargeMonitorSettings {
-  cutoffHour: number;
   maxPrice: number;
   stateOfCharge: number;
-  preferredPrice: number;
   expireAt?: number;
 }
 

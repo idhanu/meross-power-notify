@@ -8,7 +8,6 @@ const amberBaseUrl = 'https://api.amber.com.au/v1';
 // Define the specific endpoint for prices
 const sitesEndpoint = '/sites/01FWZA56KHW0TTQNA8478MT5J1/prices/current?resolution=30&next=48';
 
-
 export const getUpcomingRates = async () => {
   const url = `${amberBaseUrl}${sitesEndpoint}`;
   const headers = {
