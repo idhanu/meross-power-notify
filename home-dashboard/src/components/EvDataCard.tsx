@@ -35,7 +35,9 @@ const EvInfoCard = ({
   </Grid>
 );
 
-const toPrice = (price: number) => price.toFixed(2) + " ¢/kWh";
+const toPrice = (price: number | null) =>
+  price ? price.toFixed(2) + " ¢/kWh" : "N/A";
+
 const toDate = (date: string | number) =>
   new Date(date).toLocaleString("en-GB", {
     month: "2-digit",
