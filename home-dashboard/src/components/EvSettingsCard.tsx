@@ -41,8 +41,9 @@ export const EvSettingsCard: React.FC = () => {
         },
         body: JSON.stringify(values),
       }),
-    onSettled: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for 2 seconds
+      await queryClient.invalidateQueries({
         queryKey: ["ev_settings", "ev_last_update"],
       });
     },

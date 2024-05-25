@@ -16,7 +16,8 @@ export class ChargeMonitor {
 
   setLastUpdate(values: Partial<ChargeMonitorLastUpdate>) {
     if (values.chargingTimes && this.lastUpdate.chargingTimes) {
-      values.chargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
+      const newChargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
+      values.chargingTimes = newChargingTimes.slice(Math.max(newChargingTimes.length - 48, 0));
     }
 
     this.lastUpdate = {
@@ -56,8 +57,7 @@ export class ChargeMonitor {
 
     const requiredTime = Math.ceil((100 - settings.stateOfCharge + 0.1) / 1.25);
 
-    prices.sort((a, b) => a.perKwh - b.perKwh);
-    const lowestPrices = prices.slice(0, requiredTime);
+    const lowestPrices = [...prices].sort((a, b) => a.perKwh - b.perKwh).slice(0, requiredTime);
 
     const priceMax = Math.min(lowestPrices[lowestPrices.length - 1].perKwh + 7, settings.maxPrice);
     if (lowestPrices.length < requiredTime) {
@@ -80,6 +80,7 @@ export class ChargeMonitor {
       predictedOnState.length;
 
     this.setLastUpdate({
+      prices,
       lowestPrices,
       priceMax,
       currentPrice,
@@ -117,7 +118,7 @@ export class ChargeMonitor {
             isPluggedIn: isPluggedIn,
             chargingTimes: isPluggedIn
               ? [{ time: Date.now(), price: this.getLastUpdate()?.currentPrice?.perKwh || 0 }]
-              : undefined,
+              : [],
           });
         } else {
           logger.info('Turn off charging');

@@ -12,6 +12,7 @@ export interface ChargeMonitorSettings {
 }
 
 export interface ChargeMonitorLastUpdate {
+  prices: Rate[];
   lowestPrices: Rate[];
   priceMax: number;
   currentPrice: Rate;

@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AccessTimeFilled from "@mui/icons-material/AccessTimeFilled";
 
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
@@ -61,9 +63,20 @@ const calculateDaysSince = (targetDate: string): number => {
 };
 
 export const EvDataCard: React.FC = () => {
-  const { isLoading, isError, data, error } = useQuery("ev_last_update", () =>
-    request<{ result: ChargeMonitorLastUpdate }>("/api/ev/last_update")
+  const { isLoading, isError, data, error } = useQuery(
+    "ev_last_update",
+    () => request<{ result: ChargeMonitorLastUpdate }>("/api/ev/last_update"),
+    {
+      refetchOnWindowFocus: true,
+      staleTime: 0,
+      cacheTime: 0,
+      refetchInterval: 15000,
+    }
   );
+
+  const tomorrowMidnight = new Date();
+  tomorrowMidnight.setDate(tomorrowMidnight.getDate() + 1);
+  tomorrowMidnight.setHours(0, 0, 0, 0);
 
   const result = data?.result;
   return (
@@ -135,14 +148,32 @@ export const EvDataCard: React.FC = () => {
               value={calculateDaysSince("2023-10-19T00:00:00") * 55 + " km"}
             />
             <EvInfoCard
-              label="Lowest Prices:"
+              label="Prices:"
               xs={12}
               value={
                 <Grid container spacing={1}>
-                  {result.lowestPrices.map((price) => (
+                  {result.prices.map((price) => (
                     <Grid item xs={2} key={price.endTime} sm={1}>
-                      <Typography variant="body2" component="div">
+                      <Typography
+                        variant="body2"
+                        component="div"
+                        color={
+                          result.lowestPrices.find(
+                            (a) => price.startTime === a.startTime
+                          )
+                            ? "green"
+                            : undefined
+                        }
+                      >
                         <Stack>
+                          <div>
+                            {price.startTimestamp >
+                            tomorrowMidnight.getTime() ? (
+                              <AccessTimeFilled fontSize="small" />
+                            ) : (
+                              <AccessTimeIcon fontSize="small" />
+                            )}
+                          </div>
                           <div>{price.perKwh.toFixed(1) + "¢"}</div>
                           <div>{toTime(price.startTimestamp)}</div>
                         </Stack>
@@ -152,14 +183,14 @@ export const EvDataCard: React.FC = () => {
                 </Grid>
               }
             />
-            {result.chargingTimes && (
+            {result.chargingTimes?.length > 0 && (
               <EvInfoCard
                 label="Charging Times"
                 xs={12}
                 value={
                   <Grid container spacing={1}>
                     {result.chargingTimes
-                      .slice(Math.min(result.chargingTimes.length - 15, 0))
+                      .slice(Math.min(result.chargingTimes.length, 0))
                       .map((record) => (
                         <Grid item xs={2} key={record.time} sm={1}>
                           <Typography variant="body2" component="div">
