@@ -8,6 +8,7 @@ export class ChargeMonitor {
   private settings: ChargeMonitorSettings = {
     maxPrice: 35,
     stateOfCharge: 60,
+    force: false,
   };
 
   private lastUpdate: Partial<ChargeMonitorLastUpdate> = {};

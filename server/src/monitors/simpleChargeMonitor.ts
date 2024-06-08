@@ -11,7 +11,7 @@ export class SimpleChargeMonitor {
     force: false,
   };
 
-  private lastUpdate: Partial<ChargeMonitorLastUpdate> = {};
+  private lastUpdate: Partial<ChargeMonitorLastUpdate> | null = null;
   private interruptableSleep = new InterruptableSleep();
 
   async shouldCharge() {
@@ -64,7 +64,7 @@ export class SimpleChargeMonitor {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
-        if (await this.shouldCharge()) {
+        if (this.getSettings().force || (await this.shouldCharge())) {
           logger.info('Turn on charging');
           await setMerossPlug('EV', true);
           await sleep(30000); // wait for 30 seconds
