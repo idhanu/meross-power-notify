@@ -8,7 +8,7 @@ interface PriceTime {
 export interface ChargeMonitorSettings {
   maxPrice: number;
   stateOfCharge: number;
-  expireAt?: number;
+  force: boolean;
 }
 
 export interface ChargeMonitorLastUpdate {

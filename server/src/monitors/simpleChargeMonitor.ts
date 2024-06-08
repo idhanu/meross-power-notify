@@ -1,9 +1,19 @@
 import logger from '../pino';
 
 import { getMerossPlug, setMerossPlug } from '../apis/meross';
-import { sleep } from '../utils/helpers';
+import { InterruptableSleep, sleep } from '../utils/helpers';
+import { ChargeMonitorLastUpdate, ChargeMonitorSettings } from '../models/chargeMonitor';
 
 export class SimpleChargeMonitor {
+  private settings: ChargeMonitorSettings = {
+    maxPrice: 35,
+    stateOfCharge: 60,
+    force: false,
+  };
+
+  private lastUpdate: Partial<ChargeMonitorLastUpdate> = {};
+  private interruptableSleep = new InterruptableSleep();
+
   async shouldCharge() {
     const date = new Date();
     // Charge between 12am-6am
@@ -15,6 +25,24 @@ export class SimpleChargeMonitor {
     if (date.getHours() >= 11 && date.getHours() < 14) {
       return true;
     }
+  }
+
+  getSettings(): typeof this.settings {
+    return this.settings;
+  }
+
+  getLastUpdate() {
+    return this.lastUpdate;
+  }
+
+  updateOverrideSettings(settings: Partial<typeof this.settings>) {
+    this.settings = {
+      ...this.settings,
+      ...settings,
+    };
+
+    this.interruptableSleep.interrupt();
+    logger.info(`Updated override settings: ${JSON.stringify(this.settings)}`);
   }
 
   calculateTimeToNextMinute = (): number => {
@@ -54,7 +82,7 @@ export class SimpleChargeMonitor {
 
         const next = this.calculateTimeToNextMinute();
         logger.info(`Wait for ${next} minutes until next check`);
-        await sleep(next * 60 * 1000);
+        await this.interruptableSleep.sleep(next * 60 * 1000);
       } catch (e) {
         logger.error(e);
         logger.info(`Error occurred retrying after 1 minute`);
