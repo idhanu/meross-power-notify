@@ -40,13 +40,13 @@ const EvInfoCard = ({
 const toPrice = (price: number | null) =>
   price ? price.toFixed(2) + " ¢/kWh" : "N/A";
 
-const toDate = (date: string | number) =>
-  new Date(date).toLocaleString("en-GB", {
-    month: "2-digit",
-    day: "2-digit",
-    minute: "2-digit",
-    hour: "2-digit",
-  });
+// const toDate = (date: string | number) =>
+//   new Date(date).toLocaleString("en-GB", {
+//     month: "2-digit",
+//     day: "2-digit",
+//     minute: "2-digit",
+//     hour: "2-digit",
+//   });
 
 const toTime = (date: string | number) =>
   new Date(date).toLocaleString("en-GB", {
@@ -126,14 +126,6 @@ export const EvDataCard: React.FC = () => {
             <EvInfoCard
               label="Current Price"
               value={toPrice(result.currentPrice.perKwh)}
-            />
-            <EvInfoCard
-              label="Settings Expiry"
-              value={
-                result.settings.expireAt
-                  ? toDate(result.settings.expireAt)
-                  : "No expiry"
-              }
             />
             <EvInfoCard
               label="Predicted Charge"

@@ -14,17 +14,21 @@ import Battery0BarIcon from "@mui/icons-material/Battery0Bar";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
 import PriceChangeIcon from "@mui/icons-material/MonetizationOn";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import { useEffect, useState } from "react";
+import { Switch } from "@mui/material";
 
 interface FromValues {
   stateOfCharge: number;
   maxPrice: number;
+  force: boolean;
 }
 
 export const EvSettingsCard: React.FC = () => {
   const [values, setValues] = useState<FromValues>({
     stateOfCharge: 90,
     maxPrice: 30,
+    force: false,
   });
 
   const queryClient = useQueryClient();
@@ -115,6 +119,14 @@ export const EvSettingsCard: React.FC = () => {
                 marks
               />
               <PriceChangeIcon />
+            </Stack>
+            <Stack spacing={2} direction="row" alignItems="center">
+              <PushPinIcon />
+              <Switch
+                size="medium"
+                value={values.force}
+                onChange={(_e, v) => update("force", v)}
+              />
             </Stack>
           </Stack>
         )}
