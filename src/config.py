@@ -12,3 +12,10 @@ TO_EMAILS = os.environ.get('TO_EMAILS')
 EV_SETTINGS = {
     'ev': 12
 }
+
+# NEO API
+NEO_DEVICE_NAME = os.environ.get("NEO_DEVICE_NAME")
+NEO_DEVICE_UNIQUE_ID = os.environ.get("NEO_DEVICE_UNIQUE_ID")
+NEO_USERNAME = os.environ.get("NEO_USERNAME")
+NEO_PASSWORD = os.environ.get("NEO_PASSWORD")
+NEO_PAIRING_TOKEN = os.environ.get("NEO_PAIRING_TOKEN")

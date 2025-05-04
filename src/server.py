@@ -8,6 +8,7 @@ from amber import Amber
 
 from config import EV_SETTINGS
 from meross_helpers import find_device
+from neo_helpers import get_status
 
 server_only = __name__ == "__main__"
 
@@ -108,11 +109,23 @@ async def cors_middleware(request, handler):
     return response
 
 
+async def get_ac_status(request):
+    status = await get_status()
+    return web.json_response(
+        {
+            "success": True,
+            "result": status.dict(),
+        }
+    )
+
+
 async def run_server():
     app = web.Application(middlewares=[cors_middleware])
     app.router.add_route("GET", "/api/logs", logs_handler)
     app.router.add_route("GET", "/api/meross/plug", meross_get_plug_handler)
     app.router.add_route("POST", "/api/meross/plug", meross_post_plug_handler)
+    app.router.add_route("GET", "/api/ac/status", get_ac_status)
+
     app.router.add_route("GET", "/{tail:.*}", dashboard_handler)
 
     logger.info("Starting server")
