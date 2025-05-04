@@ -52,11 +52,10 @@ export const EvSettingsCardOvo: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      console.log("data", data.result);
       setValues(data.result);
     }
   }, [data]);
-  console.log("values", values)
+
   return (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
@@ -70,7 +69,7 @@ export const EvSettingsCardOvo: React.FC = () => {
             <Skeleton />
           </>
         )}
-        
+
         {!isLoading && (
           <Stack spacing={2}>
             <Stack spacing={2} direction="row" alignItems="center">

@@ -15,8 +15,8 @@ export class SimpleChargeMonitor {
 
   async shouldCharge() {
     // Charge between 12am-6am
-    if (this.isSuperOffPeak()) {
-      logger.info('Charging during super off-peak hours');
+    if (this.isSuperOffPeak() || this.isEvCharging()) {
+      logger.info('Charging during super off-peak and EV charging hours');
       return true;
     }
 
@@ -45,16 +45,24 @@ export class SimpleChargeMonitor {
 
   isSuperOffPeak() {
     const date = new Date();
+    // Check if the current time is between 11am and 6pm
+    return date.getHours() >= 0 && date.getHours() < 6;
+  }
+
+  isEvCharging() {
+    const date = new Date();
     // Check if the current time is between 12am and 6am
     return date.getHours() >= 0 && date.getHours() < 6;
   }
 
   getLastUpdate() {
-    let price = 47.5; // Default price
-    if (this.isSuperOffPeak()) {
+    let price = 47.3; // Default price
+    if (this.isEvCharging()) {
       price = 8;
+    } else if (this.isSuperOffPeak()) {
+      price = 0;
     } else if (this.isOffPeak()) {
-      price = 32.5;
+      price = 30.8;
     }
 
     return {
