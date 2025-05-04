@@ -7,9 +7,9 @@ import ThemeProvider from "@mui/material/styles/ThemeProvider";
 
 import { NavBar } from "./components/NavBar";
 import { LogsCard } from "./components/LogsCard";
-import { EvSettingsCard } from "./components/EvSettingsCard";
-import { EvDataCard } from "./components/EvDataCard";
+import { EvSettingsCardOvo } from "./components/EvSettingsCardOvo";
 import React from "react";
+import { EvDataCardOvo } from "./components/EvDataCardOvo";
 
 export function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -30,10 +30,10 @@ export function App() {
           <Box pt={3} pb={3}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <EvDataCard />
+                <EvDataCardOvo />
               </Grid>
               <Grid item xs={12}>
-                <EvSettingsCard />
+                <EvSettingsCardOvo />
               </Grid>
               <Grid item xs={12}>
                 <LogsCard />

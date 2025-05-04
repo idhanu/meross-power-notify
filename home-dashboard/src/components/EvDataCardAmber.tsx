@@ -12,7 +12,7 @@ import AccessTimeFilled from "@mui/icons-material/AccessTimeFilled";
 import { useQuery } from "react-query";
 import { request } from "../helpers/api";
 import { ReactNode } from "react";
-import { ChargeMonitorLastUpdate } from "../../../server/src/models/chargeMonitor";
+import { ChargeMonitorLastUpdateAmber } from "../../../server/src/models/chargeMonitor";
 
 const EvInfoCard = ({
   value,
@@ -62,10 +62,11 @@ const calculateDaysSince = (targetDate: string): number => {
   return daysDifference;
 };
 
-export const EvDataCard: React.FC = () => {
+export const EvDataCardAmber: React.FC = () => {
   const { isLoading, isError, data, error } = useQuery(
     "ev_last_update",
-    () => request<{ result: ChargeMonitorLastUpdate }>("/api/ev/last_update"),
+    () =>
+      request<{ result: ChargeMonitorLastUpdateAmber }>("/api/ev/last_update"),
     {
       refetchOnWindowFocus: true,
       staleTime: 0,

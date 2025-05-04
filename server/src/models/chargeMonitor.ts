@@ -5,22 +5,33 @@ interface PriceTime {
   price: number;
 }
 
-export interface ChargeMonitorSettings {
+export interface ChargeMonitorSettingsOvo {
+  force: boolean;
+  forceOffPeak: boolean;
+}
+
+export interface ChargeMonitorSettingsAmber {
   maxPrice: number;
   stateOfCharge: number;
   force: boolean;
 }
 
-export interface ChargeMonitorLastUpdate {
+export interface ChargeMonitorLastUpdate<TSettings> {
+  settings: TSettings;
+  isPluggedIn: boolean;
+}
+
+export interface ChargeMonitorLastUpdateOvo extends ChargeMonitorLastUpdate<ChargeMonitorSettingsOvo> {
+  currentPrice: number;
+}
+export interface ChargeMonitorLastUpdateAmber extends ChargeMonitorLastUpdate<ChargeMonitorSettingsAmber> {
   prices: Rate[];
   lowestPrices: Rate[];
   priceMax: number;
-  currentPrice: Rate;
   cutoff: number;
-  settings: ChargeMonitorSettings;
   charge: boolean;
+  currentPrice: Rate;
   predictedStateOfCharge: number;
   predictedAveragePrice: number;
-  isPluggedIn: boolean;
   chargingTimes: PriceTime[];
 }

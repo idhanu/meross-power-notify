@@ -2,20 +2,20 @@ import logger from '../pino';
 import { getUpcomingRates } from '../apis/amber';
 import { getMerossPlug, setMerossPlug } from '../apis/meross';
 import { InterruptableSleep } from '../utils/helpers';
-import { ChargeMonitorLastUpdate, ChargeMonitorSettings } from '../models/chargeMonitor';
+import { ChargeMonitorLastUpdateAmber, ChargeMonitorSettingsAmber } from '../models/chargeMonitor';
 
 export class ChargeMonitor {
-  private settings: ChargeMonitorSettings = {
+  private settings: ChargeMonitorSettingsAmber = {
     maxPrice: 35,
     stateOfCharge: 60,
     force: false,
   };
 
-  private lastUpdate: Partial<ChargeMonitorLastUpdate> = {};
+  private lastUpdate: Partial<ChargeMonitorLastUpdateAmber> = {};
 
   private interruptableSleep = new InterruptableSleep();
 
-  setLastUpdate(values: Partial<ChargeMonitorLastUpdate>) {
+  setLastUpdate(values: Partial<ChargeMonitorLastUpdateAmber>) {
     if (values.chargingTimes && this.lastUpdate.chargingTimes) {
       const newChargingTimes = [...this.lastUpdate.chargingTimes, ...values.chargingTimes];
       values.chargingTimes = newChargingTimes.slice(Math.max(newChargingTimes.length - 48, 0));
