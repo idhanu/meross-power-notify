@@ -124,7 +124,7 @@ async def run_server():
     app.router.add_route("GET", "/api/logs", logs_handler)
     app.router.add_route("GET", "/api/meross/plug", meross_get_plug_handler)
     app.router.add_route("POST", "/api/meross/plug", meross_post_plug_handler)
-    app.router.add_route("GET", "/api/ac/status", get_ac_status)
+    # app.router.add_route("GET", "/api/ac/status", get_ac_status)
 
     app.router.add_route("GET", "/{tail:.*}", dashboard_handler)
 
