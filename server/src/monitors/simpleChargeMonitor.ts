@@ -14,7 +14,7 @@ export class SimpleChargeMonitor {
   private interruptableSleep = new InterruptableSleep();
 
   async shouldCharge() {
-    // Charge between 12am-6am
+    // Charge between 12am-6am and 11am-2pm
     if (this.isSuperOffPeak() || this.isEvCharging()) {
       logger.info('Charging during super off-peak and EV charging hours');
       return true;
@@ -45,8 +45,7 @@ export class SimpleChargeMonitor {
 
   isSuperOffPeak() {
     const date = new Date();
-    // Check if the current time is between 11am and 6pm
-    return date.getHours() >= 0 && date.getHours() < 6;
+    return date.getHours() >= 11 && date.getHours() < 14;
   }
 
   isEvCharging() {
