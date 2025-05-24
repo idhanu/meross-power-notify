@@ -8,7 +8,7 @@ from amber import Amber
 
 from config import EV_SETTINGS
 from meross_helpers import find_device
-from neo_helpers import get_status
+# from neo_helpers import get_status
 
 server_only = __name__ == "__main__"
 
@@ -109,14 +109,14 @@ async def cors_middleware(request, handler):
     return response
 
 
-async def get_ac_status(request):
-    status = await get_status()
-    return web.json_response(
-        {
-            "success": True,
-            "result": status.dict(),
-        }
-    )
+# async def get_ac_status(request):
+#     status = await get_status()
+#     return web.json_response(
+#         {
+#             "success": True,
+#             "result": status.dict(),
+#         }
+#     )
 
 
 async def run_server():

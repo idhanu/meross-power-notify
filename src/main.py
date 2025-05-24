@@ -12,7 +12,7 @@ import asyncio
 from time import sleep
 
 from meross_helpers import get_meross
-from neo_helpers import get_api
+# from neo_helpers import get_api
 
 
 logger = logging.getLogger("MAIN")
@@ -20,7 +20,7 @@ logger = logging.getLogger("MAIN")
 
 async def main():
     manager, http_api_client = await get_meross()
-    api = await get_api()
+    # api = await get_api()
 
     try:
         await asyncio.gather(run_server())
@@ -28,7 +28,7 @@ async def main():
         # Close the manager and logout from http_api
         logger.info("\n\nClosing connection. Please wait...")
         manager.close()
-        await api.close()
+        # await api.close()
         await http_api_client.async_logout()
 
 

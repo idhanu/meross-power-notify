@@ -3,7 +3,6 @@
 import asyncio
 from actron_neo_api import ActronNeoAPI
 import json
-import os
 from config import NEO_PAIRING_TOKEN, NEO_DEVICE_UNIQUE_ID
 
 api = None
@@ -14,13 +13,13 @@ async def get_api():
         api = ActronNeoAPI(pairing_token=NEO_PAIRING_TOKEN)
         await api.refresh_token()
     return api
-    
+
 async def get_status():
     api = await get_api()
 
     # Get the status object
     return api.state_manager.get_status(NEO_DEVICE_UNIQUE_ID.lower())
-    
+
 
 async def main():
     async with ActronNeoAPI(username=username, password=password) as api:
